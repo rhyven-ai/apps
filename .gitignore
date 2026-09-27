@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+trial-state/
+.env
+.env.*
+*.sqlite3
+*.sqlite3-*
+*.rhyven
+*.id
+dist/

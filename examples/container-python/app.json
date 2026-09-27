@@ -1,0 +1,30 @@
+{
+  "format": 2,
+  "name": "example/text-analysis",
+  "version": "0.1.0",
+  "publisher": "example",
+  "description": "Text analysis implemented in Python, with persistent invocation counts.",
+  "hosting": {"mode": "local"},
+  "execution": {
+    "driver": "container",
+    "protocol": "rhyven.container/1",
+    "image": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "timeout_seconds": 30,
+    "memory_mb": 128,
+    "cpus": 1
+  },
+  "permissions": ["state.read", "state.write", "container.execute"],
+  "objects": {},
+  "actions": {
+    "analyze": {
+      "description": "Count words and calculate a SHA-256 checksum; track calls within this collection.",
+      "input": {"type":"object","properties":{"text":{"type":"string"}},"required":["text"],"additionalProperties":false},
+      "output": {"type":"object","properties":{"words":{"type":"integer"},"sha256":{"type":"string"},"calls":{"type":"integer"}},"required":["words","sha256","calls"],"additionalProperties":false}
+    }
+  },
+  "guide": "Call action_analyze with text. Supply a unique request_id for retry tracking. Each collection has its own invocation counter.",
+  "tests": [
+    {"operation":"execute","args":{"action":"analyze","args":{"text":"hello world"}},"expect":{"words":2,"calls":1}},
+    {"operation":"execute","args":{"action":"analyze","args":{"text":"hello"}},"expect":{"words":1,"calls":2}}
+  ]
+}

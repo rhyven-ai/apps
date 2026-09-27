@@ -1,0 +1,157 @@
+{
+  "format": 2,
+  "name": "community/remote-inventory",
+  "version": "0.3.0",
+  "publisher": "community",
+  "description": "Example disclosed self-hosted inventory endpoint; requires a Rhyven HTTP contract server.",
+  "hosting": {
+    "mode": "self-hosted",
+    "endpoint": "http://127.0.0.1:8787/rhyven",
+    "auth": "Development endpoint, no credentials",
+    "privacy": "All app inputs are sent to the loopback server; provider controls persistence.",
+    "account": "No account in this development example",
+    "billing": "No billing in this development example",
+    "domains": [
+      "127.0.0.1"
+    ]
+  },
+  "permissions": [
+    "state.read",
+    "state.write",
+    "network.connect"
+  ],
+  "objects": {
+    "location": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "asset": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "serial": {
+            "type": "string"
+          },
+          "location_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "available",
+              "retired"
+            ],
+            "default": "available"
+          }
+        },
+        "required": [
+          "label",
+          "serial"
+        ],
+        "additionalProperties": false
+      },
+      "relationships": {
+        "location_id": {
+          "object": "location"
+        }
+      },
+      "protected_fields": [
+        "status"
+      ],
+      "transitions": {
+        "status": {
+          "available": [
+            "retired"
+          ],
+          "retired": []
+        }
+      }
+    }
+  },
+  "actions": {
+    "retire": {
+      "description": "Apply status to asset",
+      "input": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "expected_revision"
+        ],
+        "additionalProperties": false
+      },
+      "object": "asset",
+      "operation": "update",
+      "set": {
+        "status": "retired"
+      },
+      "guard": {
+        "status": "available"
+      }
+    }
+  },
+  "guide": "Create locations and assets; link location_id to a location. Retire assets through the action. This unrelated community app exercises exactly the same generic runtime and universal MCP.",
+  "tests": [
+    {
+      "operation": "create",
+      "args": {
+        "object": "location",
+        "data": {
+          "name": "Lab"
+        }
+      },
+      "expect": {}
+    },
+    {
+      "operation": "create",
+      "args": {
+        "object": "asset",
+        "data": {
+          "label": "Sensor",
+          "serial": "S1",
+          "location_id": {
+            "$result": "0.id"
+          }
+        }
+      },
+      "expect": {}
+    },
+    {
+      "operation": "execute",
+      "args": {
+        "action": "retire",
+        "args": {
+          "id": {
+            "$result": "1.id"
+          },
+          "expected_revision": 1
+        }
+      },
+      "expect": {
+        "data.status": "retired"
+      }
+    }
+  ]
+}

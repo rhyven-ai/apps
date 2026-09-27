@@ -1,0 +1,425 @@
+{
+  "format": 2,
+  "name": "rhyven/ci-management",
+  "version": "0.3.0",
+  "publisher": "rhyven",
+  "description": "Inspect structured pipeline state, logs and artifacts; record retry/cancel intent.",
+  "hosting": {
+    "mode": "local"
+  },
+  "permissions": [
+    "state.read",
+    "state.write"
+  ],
+  "objects": {
+    "pipeline": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "repository": {
+            "type": "string",
+            "default": ""
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "job": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "pipeline_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "pipeline_id"
+        ],
+        "additionalProperties": false
+      },
+      "relationships": {
+        "pipeline_id": {
+          "object": "pipeline"
+        }
+      }
+    },
+    "run": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "pipeline_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "failed",
+              "passed",
+              "cancelled"
+            ],
+            "default": "queued"
+          },
+          "logs": {
+            "type": "string",
+            "default": ""
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "protected_fields": [
+        "status"
+      ],
+      "relationships": {
+        "pipeline_id": {
+          "object": "pipeline"
+        }
+      },
+      "transitions": {
+        "status": {
+          "queued": [
+            "running",
+            "cancelled"
+          ],
+          "running": [
+            "failed",
+            "passed",
+            "cancelled"
+          ],
+          "failed": [
+            "queued"
+          ],
+          "passed": [],
+          "cancelled": [
+            "queued"
+          ]
+        }
+      }
+    },
+    "stage": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id",
+          "name",
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "relationships": {
+        "run_id": {
+          "object": "run"
+        }
+      }
+    },
+    "artifact": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "uri": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id",
+          "name",
+          "uri"
+        ],
+        "additionalProperties": false
+      },
+      "immutable": true,
+      "relationships": {
+        "run_id": {
+          "object": "run"
+        }
+      }
+    },
+    "failure": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "immutable": true,
+      "relationships": {
+        "run_id": {
+          "object": "run"
+        },
+        "task_id": {
+          "app": "rhyven/work-management",
+          "object": "task"
+        }
+      }
+    }
+  },
+  "actions": {
+    "start": {
+      "description": "Apply status to run",
+      "input": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "expected_revision"
+        ],
+        "additionalProperties": false
+      },
+      "object": "run",
+      "operation": "update",
+      "set": {
+        "status": "running"
+      },
+      "guard": {
+        "status": "queued"
+      }
+    },
+    "fail": {
+      "description": "Apply status, logs to run",
+      "input": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "logs": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "expected_revision",
+          "logs"
+        ],
+        "additionalProperties": false
+      },
+      "object": "run",
+      "operation": "update",
+      "set": {
+        "status": "failed",
+        "logs": {
+          "$arg": "logs"
+        }
+      },
+      "guard": {
+        "status": "running"
+      }
+    },
+    "pass": {
+      "description": "Apply status to run",
+      "input": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "expected_revision"
+        ],
+        "additionalProperties": false
+      },
+      "object": "run",
+      "operation": "update",
+      "set": {
+        "status": "passed"
+      },
+      "guard": {
+        "status": "running"
+      }
+    },
+    "retry_run": {
+      "description": "Apply status to run",
+      "input": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "expected_revision"
+        ],
+        "additionalProperties": false
+      },
+      "object": "run",
+      "operation": "update",
+      "set": {
+        "status": "queued"
+      },
+      "guard": {}
+    },
+    "cancel_run": {
+      "description": "Apply status to run",
+      "input": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "expected_revision"
+        ],
+        "additionalProperties": false
+      },
+      "object": "run",
+      "operation": "update",
+      "set": {
+        "status": "cancelled"
+      },
+      "guard": {}
+    },
+    "inspect_logs": {
+      "description": "Read run and its recorded logs",
+      "input": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "object": "run",
+      "operation": "get"
+    }
+  },
+  "guide": "Local control-state prototype, not a CI executor. retry_run and cancel_run update recorded state only; no builds or external cancellation occur. Inspect logs stored in a run; artifact URI is metadata, not automatically downloaded. A future connector must implement real execution and declare permissions.",
+  "tests": [
+    {
+      "operation": "create",
+      "args": {
+        "object": "run",
+        "data": {
+          "name": "test"
+        }
+      },
+      "expect": {}
+    },
+    {
+      "operation": "execute",
+      "args": {
+        "action": "start",
+        "args": {
+          "id": {
+            "$result": "0.id"
+          },
+          "expected_revision": 1
+        }
+      },
+      "expect": {
+        "data.status": "running"
+      }
+    },
+    {
+      "operation": "execute",
+      "args": {
+        "action": "fail",
+        "args": {
+          "id": {
+            "$result": "0.id"
+          },
+          "expected_revision": 2,
+          "logs": "test failed"
+        }
+      },
+      "expect": {
+        "data.status": "failed"
+      }
+    },
+    {
+      "operation": "execute",
+      "args": {
+        "action": "retry_run",
+        "args": {
+          "id": {
+            "$result": "0.id"
+          },
+          "expected_revision": 3
+        }
+      },
+      "expect": {
+        "data.status": "queued"
+      }
+    }
+  ],
+  "display_name": "CI Management"
+}

@@ -1,0 +1,307 @@
+{
+  "format": 2,
+  "name": "rhyven/error-management",
+  "version": "0.3.0",
+  "publisher": "rhyven",
+  "description": "Group error occurrences, track releases, regressions and remediation.",
+  "hosting": {
+    "mode": "local"
+  },
+  "permissions": [
+    "state.read",
+    "state.write"
+  ],
+  "objects": {
+    "error": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "fingerprint": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "resolved"
+            ],
+            "default": "open"
+          },
+          "owner": {
+            "type": "string",
+            "default": ""
+          },
+          "resolution": {
+            "type": "string",
+            "default": ""
+          }
+        },
+        "required": [
+          "title",
+          "fingerprint"
+        ],
+        "additionalProperties": false
+      },
+      "protected_fields": [
+        "status"
+      ],
+      "transitions": {
+        "status": {
+          "open": [
+            "resolved"
+          ],
+          "resolved": [
+            "open"
+          ]
+        }
+      }
+    },
+    "occurrence": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "error_id": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "stack_trace": {
+            "type": "string",
+            "default": ""
+          },
+          "release_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error_id",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "immutable": true,
+      "relationships": {
+        "error_id": {
+          "object": "error"
+        },
+        "release_id": {
+          "object": "release"
+        }
+      }
+    },
+    "release": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "commit": {
+            "type": "string",
+            "default": ""
+          }
+        },
+        "required": [
+          "version"
+        ],
+        "additionalProperties": false
+      },
+      "immutable": true
+    },
+    "regression": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "error_id": {
+            "type": "string"
+          },
+          "release_id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error_id",
+          "description"
+        ],
+        "additionalProperties": false
+      },
+      "immutable": true,
+      "relationships": {
+        "error_id": {
+          "object": "error"
+        },
+        "release_id": {
+          "object": "release"
+        }
+      }
+    },
+    "remediation": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "error_id": {
+            "type": "string"
+          },
+          "task_id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error_id",
+          "description"
+        ],
+        "additionalProperties": false
+      },
+      "relationships": {
+        "error_id": {
+          "object": "error"
+        },
+        "task_id": {
+          "app": "rhyven/work-management",
+          "object": "task"
+        }
+      }
+    }
+  },
+  "actions": {
+    "resolve": {
+      "description": "Apply status, resolution to error",
+      "input": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "resolution": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "expected_revision",
+          "resolution"
+        ],
+        "additionalProperties": false
+      },
+      "object": "error",
+      "operation": "update",
+      "set": {
+        "status": "resolved",
+        "resolution": {
+          "$arg": "resolution"
+        }
+      },
+      "guard": {
+        "status": "open"
+      }
+    },
+    "reopen": {
+      "description": "Apply status to error",
+      "input": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "expected_revision"
+        ],
+        "additionalProperties": false
+      },
+      "object": "error",
+      "operation": "update",
+      "set": {
+        "status": "open"
+      },
+      "guard": {
+        "status": "resolved"
+      }
+    },
+    "assign": {
+      "description": "Apply owner to error",
+      "input": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "owner": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "expected_revision",
+          "owner"
+        ],
+        "additionalProperties": false
+      },
+      "object": "error",
+      "operation": "update",
+      "set": {
+        "owner": {
+          "$arg": "owner"
+        }
+      },
+      "guard": {}
+    }
+  },
+  "guide": "Query errors by fingerprint to group occurrences; create occurrences referring to that error. Record releases and regressions explicitly. Resolve/reopen with revision checks. This package stores structured reports; no automatic telemetry collection.",
+  "tests": [
+    {
+      "operation": "create",
+      "args": {
+        "object": "error",
+        "data": {
+          "title": "Build failure",
+          "fingerprint": "build:42"
+        }
+      },
+      "expect": {}
+    },
+    {
+      "operation": "execute",
+      "args": {
+        "action": "resolve",
+        "args": {
+          "id": {
+            "$result": "0.id"
+          },
+          "expected_revision": 1,
+          "resolution": "Fixed input"
+        }
+      },
+      "expect": {
+        "data.status": "resolved"
+      }
+    }
+  ],
+  "display_name": "Error Management"
+}

@@ -1,0 +1,42 @@
+{
+  "format": 2,
+  "name": "example/background-counter",
+  "version": "0.1.1",
+  "publisher": "example",
+  "description": "A persistent Python service with a durable background counter and scoped knowledge writes.",
+  "hosting": {"mode": "local"},
+  "permissions": ["state.read", "state.write", "container.execute", "service.run", "app.call"],
+  "execution": {
+    "driver": "container", "mode": "service", "protocol": "rhyven.service/1",
+    "image": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "start_policy": "manual", "timeout_seconds": 10, "startup_timeout_seconds": 15,
+    "shutdown_timeout_seconds": 5, "restart_limit": 2, "memory_mb": 128, "cpus": 1,
+    "calls": [{"category": "rhyven/project-knowledge", "function": "action_remember", "version": "0.4.0"}]
+  },
+  "objects": {},
+  "actions": {
+    "status": {
+      "description": "Read the durable background counter and boot count",
+      "input": {"type": "object", "properties": {}, "additionalProperties": false},
+      "output": {"type": "object", "properties": {"ticks": {"type": "integer"}, "calls": {"type": "integer"}, "boots": {"type": "integer"}}, "required": ["ticks", "calls", "boots"], "additionalProperties": false}
+    },
+    "increment": {
+      "description": "Increment a durable counter; supply request_id for safe retries",
+      "input": {"type": "object", "properties": {"amount": {"type": "integer", "minimum": 1, "maximum": 100}}, "required": ["amount"], "additionalProperties": false},
+      "output": {"type": "object", "properties": {"ticks": {"type": "integer"}, "calls": {"type": "integer"}, "boots": {"type": "integer"}}, "required": ["ticks", "calls", "boots"], "additionalProperties": false}
+    },
+    "remember": {
+      "description": "Append a finding to the installed Project Knowledge app through a scoped callback",
+      "input": {"type": "object", "properties": {"title": {"type": "string"}, "body": {"type": "string"}}, "required": ["title", "body"], "additionalProperties": false},
+      "output": {"type": "object", "properties": {"note_id": {"type": "string"}}, "required": ["note_id"], "additionalProperties": false}
+    },
+    "health": {
+      "description": "Check local service health without peer or network access",
+      "input": {"type": "object", "properties": {}, "additionalProperties": false},
+      "output": {"type": "object", "properties": {"ok": {"type": "boolean"}}, "required": ["ok"], "additionalProperties": false}
+    }
+  },
+  "health_action": "health",
+  "guide": "Install and enable the service with the runtime lifecycle category. status reports ticks that advance even when no agent is calling. Use increment with a stable request_id. remember requires rhyven/project-knowledge 0.4.0 in the same collection. The package has no external network permission. Stop retains all state; an explicit stop prevents automatic restart until start is requested.",
+  "tests": [{"operation": "execute", "args": {"action": "increment", "args": {"amount": 2}}, "expect": {"calls": 2}}]
+}

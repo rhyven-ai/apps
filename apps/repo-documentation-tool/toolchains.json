@@ -1,0 +1,14 @@
+[
+  {
+    "url": "https://download.eclipse.org/jdtls/milestones/1.61.0/jdt-language-server-1.61.0-202609031315.tar.gz",
+    "sha256": "338e7e73d61836651ba2453919a0d34fa763eb4e7c03342092309bffb8934c64"
+  },
+  {
+    "url": "https://github.com/rust-lang/rust-analyzer/releases/download/2026-09-21/rust-analyzer-x86_64-unknown-linux-gnu.gz",
+    "sha256": "b2d24ce2bda2ea05b1ad7c2917d205f8111775f703ccd908e6061803ae8257d0"
+  },
+  {
+    "url": "https://github.com/rust-lang/rust-analyzer/releases/download/2026-09-21/rust-analyzer-aarch64-unknown-linux-gnu.gz",
+    "sha256": "32a75657041a7a2ebf635c1e3968753e2639778b68dd4fb13c4b2584255f2ba8"
+  }
+]

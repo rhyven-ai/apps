@@ -1,0 +1,7 @@
+# Allow only reviewed build inputs; exclude state, keys and local caches.
+**
+!Dockerfile
+!LICENSE
+!NOTICE
+!main.py
+!rhyven_service.py

@@ -1,0 +1,149 @@
+{
+  "format": 2,
+  "name": "rhyven/inventory",
+  "version": "0.3.0",
+  "publisher": "rhyven",
+  "description": "Track physical assets, locations and retirement without custom runtime code.",
+  "hosting": {
+    "mode": "local"
+  },
+  "permissions": [
+    "state.read",
+    "state.write"
+  ],
+  "objects": {
+    "location": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "asset": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "serial": {
+            "type": "string"
+          },
+          "location_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "available",
+              "retired"
+            ],
+            "default": "available"
+          }
+        },
+        "required": [
+          "label",
+          "serial"
+        ],
+        "additionalProperties": false
+      },
+      "relationships": {
+        "location_id": {
+          "object": "location"
+        }
+      },
+      "protected_fields": [
+        "status"
+      ],
+      "transitions": {
+        "status": {
+          "available": [
+            "retired"
+          ],
+          "retired": []
+        }
+      }
+    }
+  },
+  "actions": {
+    "retire": {
+      "description": "Apply status to asset",
+      "input": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "expected_revision"
+        ],
+        "additionalProperties": false
+      },
+      "object": "asset",
+      "operation": "update",
+      "set": {
+        "status": "retired"
+      },
+      "guard": {
+        "status": "available"
+      }
+    }
+  },
+  "guide": "Create locations and assets; link location_id to a location. Retire assets through the action. This unrelated community app exercises exactly the same generic runtime and universal MCP.",
+  "tests": [
+    {
+      "operation": "create",
+      "args": {
+        "object": "location",
+        "data": {
+          "name": "Lab"
+        }
+      },
+      "expect": {}
+    },
+    {
+      "operation": "create",
+      "args": {
+        "object": "asset",
+        "data": {
+          "label": "Sensor",
+          "serial": "S1",
+          "location_id": {
+            "$result": "0.id"
+          }
+        }
+      },
+      "expect": {}
+    },
+    {
+      "operation": "execute",
+      "args": {
+        "action": "retire",
+        "args": {
+          "id": {
+            "$result": "1.id"
+          },
+          "expected_revision": 1
+        }
+      },
+      "expect": {
+        "data.status": "retired"
+      }
+    }
+  ],
+  "display_name": "Inventory"
+}

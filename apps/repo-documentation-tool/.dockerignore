@@ -1,0 +1,14 @@
+# Allow only reviewed build inputs; exclude state, keys and local caches.
+**
+!Dockerfile
+!LICENSE
+!NOTICE
+!atlas.py
+!generate_manifest.py
+!install_toolchains.py
+!lsp.py
+!main.py
+!package-lock.json
+!package.json
+!repository_client.py
+!toolchains.json
