@@ -31,7 +31,7 @@ The source manifest has a placeholder image digest. Supply the built image ID
 when packaging. That ID works only on hosts where the image exists. Distribution
 requires an image registry digest and a package listing. App source is available
 under Apache-2.0 in [rhyven-ai/apps](https://github.com/rhyven-ai/apps). The separate
-Rhyven engine remains proprietary. Publishing source does not publish a new image.
+Rhyven engine is also Apache-2.0; see [engine source](https://github.com/rhyven-ai/rhyven). Publishing source does not publish a new image.
 
 ## Agent workflow
 

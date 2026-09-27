@@ -152,7 +152,7 @@ Recorded results and platform limits: [TEST-REPORT.md](TEST-REPORT.md).
 ## License
 
 Rhyven-authored files are Apache-2.0; see [LICENSE](LICENSE) and [NOTICE](NOTICE).
-The engine remains a separate proprietary product. Language servers, libraries
+The engine is also Apache-2.0 in [rhyven-ai/rhyven](https://github.com/rhyven-ai/rhyven). Language servers, libraries
 and base-image packages retain their own licenses; review [THIRD_PARTY.md](THIRD_PARTY.md)
 before redistributing an image. App source is published at
 [rhyven-ai/apps](https://github.com/rhyven-ai/apps).

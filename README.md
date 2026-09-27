@@ -2,8 +2,8 @@
 
 Open-source headless applications for the Rhyven runtime. All Rhyven-authored
 app materials in this repository are licensed under **Apache-2.0**. The Rhyven
-engine is a separate proprietary product; this repository does not contain or
-license its implementation.
+engine is also open source under Apache-2.0, in the separate
+[rhyven-ai/rhyven repository](https://github.com/rhyven-ai/rhyven).
 
 | App | Source | Execution |
 | --- | --- | --- |
@@ -54,6 +54,12 @@ Apps share `rhyven_categories()`, `rhyven_describe(category)`, and
 `rhyven_call(category, function, args)`. The category is an installed app ID.
 Read its description for current function schemas and guidance. Agents can
 coordinate tasks, knowledge and messages without app-specific MCP servers.
+
+Give your agent the [Use Rhyven skill](skills/use-rhyven/SKILL.md), or merge the
+shorter [usage rule](skills/use-rhyven/RULE.md) into its supported project
+instructions. Both cover discovery, collection selection, marketplace approval
+and app operations. Preserve existing instructions; neither file changes client
+configuration or grants installation consent by itself.
 
 ## Build your own
 
