@@ -5,8 +5,7 @@
 scheduled availability, searches, delivery leases and acknowledgements. It has
 no network permission, external delivery, agent spawning or model API dependency.
 
-This is security update candidate **0.1.1**, pending publication; public 0.1.0
-remains in the registry. The candidate removes unused pip from its image. Work Management
+Version **0.1.1** removes unused pip from its image. Work Management
 and Project Knowledge remain independent declarative apps without Docker.
 
 ## Build and install
