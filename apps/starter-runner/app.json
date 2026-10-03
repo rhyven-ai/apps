@@ -1,0 +1,514 @@
+{
+  "format": 2,
+  "name": "rhyven/starter-runner",
+  "version": "0.1.0",
+  "publisher": "rhyven",
+  "description": "Optional starter harness for users without one. Connect a model API, split goals into phases, save knowledge and pause for user answers. Existing harnesses can skip it.",
+  "hosting": {
+    "mode": "local"
+  },
+  "permissions": [
+    "state.read",
+    "state.write",
+    "container.execute",
+    "service.run",
+    "app.call",
+    "network.connect",
+    "secrets.read"
+  ],
+  "execution": {
+    "driver": "container",
+    "mode": "service",
+    "protocol": "rhyven.service/1",
+    "image": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "start_policy": "manual",
+    "timeout_seconds": 15,
+    "startup_timeout_seconds": 15,
+    "shutdown_timeout_seconds": 30,
+    "restart_limit": 2,
+    "memory_mb": 128,
+    "cpus": 1,
+    "secrets": [
+      "RHYVEN_SECRET_MODEL_CONFIG"
+    ],
+    "calls": [
+      {
+        "category": "rhyven/work-management",
+        "function": "object_project_create",
+        "version": "0.4.0"
+      },
+      {
+        "category": "rhyven/work-management",
+        "function": "object_task_create",
+        "version": "0.4.0"
+      },
+      {
+        "category": "rhyven/work-management",
+        "function": "object_task_get",
+        "version": "0.4.0"
+      },
+      {
+        "category": "rhyven/work-management",
+        "function": "action_assign",
+        "version": "0.4.0"
+      },
+      {
+        "category": "rhyven/work-management",
+        "function": "action_complete",
+        "version": "0.4.0"
+      },
+      {
+        "category": "rhyven/work-management",
+        "function": "action_block",
+        "version": "0.4.0"
+      },
+      {
+        "category": "rhyven/work-management",
+        "function": "action_resume",
+        "version": "0.4.0"
+      },
+      {
+        "category": "rhyven/project-knowledge",
+        "function": "action_remember",
+        "version": "0.4.0"
+      },
+      {
+        "category": "rhyven/project-knowledge",
+        "function": "object_note_query",
+        "version": "0.4.0"
+      },
+      {
+        "category": "rhyven/user-questions",
+        "function": "action_ask",
+        "version": "0.1.0"
+      },
+      {
+        "category": "rhyven/user-questions",
+        "function": "object_question_get",
+        "version": "0.1.0"
+      }
+    ]
+  },
+  "objects": {},
+  "actions": {
+    "start": {
+      "description": "Queue a bounded goal; optional starter for users without a harness",
+      "input": {
+        "type": "object",
+        "properties": {
+          "goal": {
+            "type": "string",
+            "maxLength": 8000,
+            "minLength": 1
+          },
+          "max_steps": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 64,
+            "default": 16
+          },
+          "max_seconds": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 900,
+            "default": 300
+          },
+          "max_tokens": {
+            "type": "integer",
+            "minimum": 1000,
+            "maximum": 200000,
+            "default": 40000
+          }
+        },
+        "required": [
+          "goal"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "status": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "goal": {
+            "type": "string",
+            "maxLength": 8000
+          },
+          "phase": {
+            "type": "integer"
+          },
+          "steps": {
+            "type": "integer"
+          },
+          "question_id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "error": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 8000
+          },
+          "phases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "criteria": {
+                  "type": "string",
+                  "maxLength": 2000
+                },
+                "task_id": {
+                  "type": "string",
+                  "maxLength": 100
+                }
+              },
+              "required": [
+                "title",
+                "criteria",
+                "task_id"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 12
+          },
+          "model_tokens": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "run_id",
+          "status",
+          "goal",
+          "phase",
+          "steps",
+          "question_id",
+          "error",
+          "summary",
+          "phases",
+          "model_tokens"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "status": {
+      "description": "Read checkpoint and pending question",
+      "input": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "run_id"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "status": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "goal": {
+            "type": "string",
+            "maxLength": 8000
+          },
+          "phase": {
+            "type": "integer"
+          },
+          "steps": {
+            "type": "integer"
+          },
+          "question_id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "error": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 8000
+          },
+          "phases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "criteria": {
+                  "type": "string",
+                  "maxLength": 2000
+                },
+                "task_id": {
+                  "type": "string",
+                  "maxLength": 100
+                }
+              },
+              "required": [
+                "title",
+                "criteria",
+                "task_id"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 12
+          },
+          "model_tokens": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "run_id",
+          "status",
+          "goal",
+          "phase",
+          "steps",
+          "question_id",
+          "error",
+          "summary",
+          "phases",
+          "model_tokens"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "resume": {
+      "description": "Explicitly resume a paused run or an answered question; limits are not reset",
+      "input": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "run_id"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "status": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "goal": {
+            "type": "string",
+            "maxLength": 8000
+          },
+          "phase": {
+            "type": "integer"
+          },
+          "steps": {
+            "type": "integer"
+          },
+          "question_id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "error": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 8000
+          },
+          "phases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "criteria": {
+                  "type": "string",
+                  "maxLength": 2000
+                },
+                "task_id": {
+                  "type": "string",
+                  "maxLength": 100
+                }
+              },
+              "required": [
+                "title",
+                "criteria",
+                "task_id"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 12
+          },
+          "model_tokens": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "run_id",
+          "status",
+          "goal",
+          "phase",
+          "steps",
+          "question_id",
+          "error",
+          "summary",
+          "phases",
+          "model_tokens"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "cancel": {
+      "description": "Cancel a run; already committed app state is retained",
+      "input": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "maxLength": 100
+          }
+        },
+        "required": [
+          "run_id"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "status": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "goal": {
+            "type": "string",
+            "maxLength": 8000
+          },
+          "phase": {
+            "type": "integer"
+          },
+          "steps": {
+            "type": "integer"
+          },
+          "question_id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "error": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 8000
+          },
+          "phases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "criteria": {
+                  "type": "string",
+                  "maxLength": 2000
+                },
+                "task_id": {
+                  "type": "string",
+                  "maxLength": 100
+                }
+              },
+              "required": [
+                "title",
+                "criteria",
+                "task_id"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 12
+          },
+          "model_tokens": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "run_id",
+          "status",
+          "goal",
+          "phase",
+          "steps",
+          "question_id",
+          "error",
+          "summary",
+          "phases",
+          "model_tokens"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "health": {
+      "description": "Check the local service without model calls",
+      "input": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "guide": "Optional, for users without an existing harness. Existing agents can continue using Rhyven apps without this runner. Install work-management 0.4.0, project-knowledge 0.4.0 and user-questions 0.1.0 in the same collection first. Configure RHYVEN_SECRET_MODEL_CONFIG as JSON with endpoint (full chat/completions URL), model, and optional api_key. Selected goal/context is sent to that endpoint; API costs are user-managed. start queues one bounded run; status includes a pending question ID; a human answers through User Questions then resume continues. Restart pauses unfinished runs; resume is explicit. Review model-written conclusions: this runner performs planning and knowledge work, not arbitrary code execution. No shell, marketplace, messaging-service or approval grants.",
+  "tests": [],
+  "health_action": "health"
+}

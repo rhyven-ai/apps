@@ -1,4 +1,4 @@
-# Rhyven Repo Documentation Tool — Python container app
+# Rhyven Repo Documentation Tool
 
 Rhyven Repo Documentation Tool surveys an imported repository, asks language servers for structure and
 relationships, and stores summaries written by the calling agent. It is a complete
@@ -31,6 +31,39 @@ the TypeScript language server. JavaScript and TypeScript share the latter. The
 host needs Docker, not separate language-server installations. Building downloads
 the toolchains; running the app requests no network or secrets access. The local
 import/export helper requires Python 3 on the caller's machine.
+
+## Native Python variant
+
+The script backend can run the same app without Docker. Use Rhyven 0.4.0-rc.9 or later; rc.8 does not support scripts.
+It requires Python 3.10+
+and Node 22+ on the host. Rhyven installs the locked Pyright and TypeScript language
+servers into a managed environment. Other language servers remain optional host
+installations; survey and scan explicitly report missing engines. Use the container
+variant for the bundled toolchain set.
+
+```sh
+python3 apps/repo-documentation-tool/package_script.py --out /tmp/repo-docs-script
+rhyven app validate /tmp/repo-docs-script
+rhyven app test /tmp/repo-docs-script --allow-host
+rhyven app package /tmp/repo-docs-script --out /tmp/repo-docs-script.rhyven.json
+rhyven --collection script-trial install /tmp/repo-docs-script.rhyven.json --accept-permissions
+rhyven --collection script-trial connect --client codex
+```
+
+Review `host.execute` before accepting: native code runs unsandboxed with your OS
+user's filesystem, network and process access. Dependency environments are not
+security sandboxes. The generator defaults to an isolated dependency environment;
+`--environment shared` reuses compatible, identically locked environments.
+
+The candidate native package is version 0.2.0 with the same app ID and action
+schemas. Install it in a separate collection from the existing container app;
+driver changes cannot be applied as ordinary updates. This native app candidate has not been published to the registry.
+
+Test the complete native journey with:
+
+```sh
+python3 apps/repo-documentation-tool/tests/integration.py /path/to/rhyven --script
+```
 
 ## Agent workflow
 
@@ -126,12 +159,15 @@ Rhyven backup/restore includes imported source, artifacts and language caches.
 The first version accepts up to 5,000 files / 20 MiB of UTF-8 source per repository,
 200,000 bytes per file, and 100 files / 600,000 content bytes per import action.
 Responses and scans are paginated. Scans have a 230-second work budget inside the
-300-second container timeout, 2 GiB memory and 2 CPUs. Large repositories should
+300-second action timeout. The container additionally enforces 2 GiB memory and
+2 CPUs; native execution has no memory or CPU quota. Large repositories should
 be imported as focused scopes; these are explicit app limits, not platform limits.
 
 Language servers analyze disposable copies, so generated lockfiles and project
-metadata cannot change the imported snapshot. They run offline with automatic dependency acquisition and common
-build hooks disabled. Missing external dependencies, compiler configuration or
+metadata cannot change the imported snapshot. The container runs without network
+access. Both variants disable automatic dependency acquisition and common build
+hooks through server configuration; native execution does not enforce a network
+sandbox. Missing external dependencies, compiler configuration or
 unsupported server methods can reduce relationship coverage. Servers are started
 per action, so live queries include startup overhead. The image includes several
 full toolchains and is substantially larger than the tiny Python fixture.

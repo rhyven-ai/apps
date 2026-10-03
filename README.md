@@ -12,19 +12,21 @@ engine is also open source under Apache-2.0, in the separate
 | Error Management | [manifest](catalog/error-management.json) | Declarative |
 | CI Management | [manifest](catalog/ci-management.json) | Declarative |
 | Inventory | [manifest](catalog/inventory.json) | Declarative |
+| User Questions | [manifest and usage](apps/user-questions/README.md) | Declarative |
+| Starter Runner | [source and setup](apps/starter-runner/README.md) | Persistent container |
+| File RAG | [standalone repository](https://github.com/rhyven-ai/file-rag) | Native Python script |
+| Razorback | [standalone repository](https://github.com/rhyven-ai/razorback) | Native Python connection app |
 | Messaging | [source and build instructions](apps/messaging/README.md) | Persistent container |
-| Rhyven Repo Documentation Tool | [source and build instructions](apps/repo-documentation-tool/README.md) | On-demand container |
+| Rhyven Repo Documentation Tool | [source and build instructions](apps/repo-documentation-tool/README.md) | On-demand container or native Python |
 
-CI Management records pipeline state; it does not execute builds. The source
-versions of the container apps are 0.1.1 candidates. Check the
+CI Management records pipeline state; it does not execute builds. Messaging and Repo Documentation Tool have source version 0.1.1 candidates. Check the
 [public registry](https://github.com/rhyven-ai/registry) for installable versions
 and immutable image digests; publishing source does not release a new image.
 
 ## Use or modify an app
 
 Install a compatible Rhyven binary separately. These apps use manifest format 2
-and the three-tool interface supported by the 0.4.0-rc.6 public preview and later
-candidates. Linux is the tested container platform; check the runtime's platform
+and the three-tool interface in Rhyven 0.5.2. Linux is the tested container platform; check the runtime's platform
 requirements and license terms. No Rust source build is needed to author an app.
 
 From this repository's root:
@@ -64,6 +66,9 @@ configuration or grants installation consent by itself.
 ## Build your own
 
 - [Declarative app skill](skills/build-rhyven-declarative-app/SKILL.md)
+- [Native Python and JavaScript skill](skills/build-rhyven-script-app/SKILL.md)
+- [Native Python example](examples/script-python/README.md)
+- [Native JavaScript example](examples/script-javascript/README.md)
 - [On-demand container skill, including Dockerfile](skills/build-rhyven-container-app/SKILL.md)
 - [Persistent service skill, including Dockerfile](skills/build-rhyven-service-app/SKILL.md)
 - [Publishing skill](skills/publish-rhyven-app/SKILL.md)
@@ -76,6 +81,7 @@ fixture, not a hosted service or an advertised v1 backend.
 ## Tests
 
 ```sh
+python3 -m unittest discover -s apps/starter-runner/tests -v
 python3 -m unittest discover -s apps/messaging/tests -v
 python3 -m unittest discover -s apps/repo-documentation-tool/tests -v
 ```
@@ -89,3 +95,11 @@ For dependency licensing and image distribution obligations, read
 [registry security channel](https://github.com/rhyven-ai/registry/security/advisories/new).
 Do not attach credentials, customer repositories, app state or private reports
 to public issues. Contributions should include tests and use Apache-2.0 terms.
+
+## Optional starter apps
+
+Existing harnesses can use all general apps through the same three tools. Users
+without a harness can add [Starter Runner](apps/starter-runner/README.md), which
+connects their own model API to tasks, knowledge and user questions. It requires
+Docker. [User Questions](apps/user-questions/README.md) is a separate declarative
+app, also useful to existing harnesses. Neither is required for ordinary app use.

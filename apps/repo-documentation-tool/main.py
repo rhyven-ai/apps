@@ -8,7 +8,7 @@ from atlas import Atlas, AtlasError
 
 
 def handle(request):
-    if request.get('protocol')!='rhyven.container/1':
+    if request.get('protocol') not in ('rhyven.container/1', 'rhyven.action/1'):
         raise AtlasError('INVALID_ARGUMENT','Unsupported execution protocol')
     args=request.get('args',{})
     app=Atlas(os.environ.get('RHYVEN_DATA_DIR','/data'),args.get('repository'))

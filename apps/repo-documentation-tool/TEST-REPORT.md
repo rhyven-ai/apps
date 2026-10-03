@@ -1,5 +1,54 @@
 # Rhyven Repo Documentation Tool acceptance results
 
+## Native script candidate — September 28, 2026
+
+Tested on Linux x86-64 / WSL2 with Python 3.10.12 and Node 22.23.2 using the
+`feature/script-runtime` source build. This native variant is not published.
+It uses the same app action schemas and three-tool MCP interface as the container.
+
+Passed:
+
+- Native packaging, explicit host-execution consent, installation and discovery.
+- Real Pyright scanning: all four fixture symbols, expected line numbers,
+  100-reference cap with truncation flagged, and live relationship refresh.
+- Calling-agent fixture summaries in symbol → file → directory → subsystem →
+  main-flow order, with parent dependency checks and persisted artifacts.
+- Authenticated REST and direct MCP reading the same state; backup/restore,
+  removal/reinstallation, collection isolation and stale-index rejection.
+- Real JavaScript and TypeScript scans, each returning three fixture symbols.
+- Seven app unit tests; 62 Rust workspace tests; formatting and strict Clippy.
+- Python and JavaScript CLI scaffolding, validation, packaging, consent, action
+  calls and retry receipts. Child processes did not inherit a test credential.
+- Managed environment reuse, separate collection state, incomplete receipts,
+  output bounds and timeout cleanup of ordinary child processes.
+- A pinned Python wheel installed and imported successfully; an incorrect wheel
+  hash prevented activation. This separate dependency test used a temporary
+  CPython 3.12 interpreter with pip bootstrap support.
+
+Limits observed:
+
+- clangd, fortls, gopls, rust-analyzer and JDTLS were absent from this host's PATH.
+  The app reported incomplete scans and missing-server issues for their languages.
+  Full native language coverage was not demonstrated.
+- The host Python lacked pip/venv bootstrap support. The documentation app needs
+  no pip packages and worked with `venv --without-pip`; Python apps with pip
+  dependencies need an interpreter with that support installed.
+- Native code has unsandboxed OS-user access after `host.execute` approval.
+  Dependency isolation is not filesystem, network or memory isolation.
+- The existing test Docker daemon was stopped. No fresh real-container regression
+  result is claimed for this branch; the earlier container results below remain
+  historical evidence.
+- Source validation/export checks passed. Runtime and registry release alignment
+  is required before publishing script packages.
+
+Reproduce the native acceptance test:
+
+```sh
+python3 apps/repo-documentation-tool/tests/integration.py /path/to/branch/rhyven --script
+```
+
+## Earlier container acceptance — September 24, 2026
+
 Tested September 24, 2026 on Linux x86-64 / WSL2, using Docker Engine 28.5.1.
 Rhyven's existing release binary installed and operated the app. No Rust runtime
 or transport changes were needed for this app.

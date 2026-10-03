@@ -1,0 +1,436 @@
+{
+  "format": 2,
+  "name": "rhyven/user-questions",
+  "version": "0.1.0",
+  "publisher": "rhyven",
+  "description": "Questions, answers and waiting states for optional starter runners or existing harnesses. No model or Docker required.",
+  "hosting": {
+    "mode": "local"
+  },
+  "permissions": [
+    "state.read",
+    "state.write"
+  ],
+  "objects": {
+    "question": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "maxLength": 8000,
+            "minLength": 1
+          },
+          "context": {
+            "type": "string",
+            "maxLength": 8000,
+            "default": ""
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "maxItems": 8,
+            "default": []
+          },
+          "run_id": {
+            "type": "string",
+            "maxLength": 100,
+            "default": ""
+          },
+          "task_id": {
+            "type": "string",
+            "maxLength": 100,
+            "default": ""
+          },
+          "recipient": {
+            "type": "string",
+            "maxLength": 100,
+            "default": "user"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "answered",
+              "cancelled",
+              "expired"
+            ],
+            "default": "pending"
+          },
+          "answer": {
+            "type": "string",
+            "maxLength": 8000,
+            "default": ""
+          },
+          "asked_by": {
+            "type": "string",
+            "maxLength": 200,
+            "default": ""
+          },
+          "answered_by": {
+            "type": "string",
+            "maxLength": 200,
+            "default": ""
+          },
+          "answered_at": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          },
+          "expires_at": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          }
+        },
+        "required": [
+          "question"
+        ],
+        "additionalProperties": false
+      },
+      "protected_fields": [
+        "status",
+        "answer",
+        "asked_by",
+        "answered_by",
+        "answered_at"
+      ],
+      "search_fields": [
+        "question",
+        "context",
+        "run_id"
+      ],
+      "transitions": {
+        "status": {
+          "pending": [
+            "answered",
+            "cancelled",
+            "expired"
+          ],
+          "answered": [],
+          "cancelled": [],
+          "expired": []
+        }
+      }
+    }
+  },
+  "actions": {
+    "ask": {
+      "description": "Save a question for a user; not an authorization request",
+      "input": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "maxLength": 8000,
+            "minLength": 1
+          },
+          "context": {
+            "type": "string",
+            "maxLength": 8000,
+            "default": ""
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "maxItems": 8,
+            "default": []
+          },
+          "run_id": {
+            "type": "string",
+            "maxLength": 100,
+            "default": ""
+          },
+          "task_id": {
+            "type": "string",
+            "maxLength": 100,
+            "default": ""
+          },
+          "recipient": {
+            "type": "string",
+            "maxLength": 100,
+            "default": "user"
+          },
+          "expires_at": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0
+          }
+        },
+        "required": [
+          "question"
+        ],
+        "additionalProperties": false
+      },
+      "object": "question",
+      "operation": "create",
+      "set": {
+        "question": {
+          "$arg": "question"
+        },
+        "context": {
+          "$arg": "context"
+        },
+        "choices": {
+          "$arg": "choices"
+        },
+        "run_id": {
+          "$arg": "run_id"
+        },
+        "task_id": {
+          "$arg": "task_id"
+        },
+        "recipient": {
+          "$arg": "recipient"
+        },
+        "expires_at": {
+          "$arg": "expires_at"
+        }
+      },
+      "expressions": {
+        "asked_by": {
+          "runtime": "actor"
+        }
+      }
+    },
+    "answer": {
+      "description": "Record a user answer with revision protection",
+      "input": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "answer": {
+            "type": "string",
+            "maxLength": 8000,
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "expected_revision",
+          "answer"
+        ],
+        "additionalProperties": false
+      },
+      "object": "question",
+      "operation": "update",
+      "set": {
+        "answer": {
+          "$arg": "answer"
+        },
+        "status": "answered"
+      },
+      "condition": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "args": [
+              {
+                "field": "status"
+              },
+              {
+                "literal": "pending"
+              }
+            ]
+          },
+          {
+            "op": "or",
+            "args": [
+              {
+                "op": "eq",
+                "args": [
+                  {
+                    "field": "expires_at"
+                  },
+                  {
+                    "literal": 0
+                  }
+                ]
+              },
+              {
+                "op": "gt",
+                "args": [
+                  {
+                    "field": "expires_at"
+                  },
+                  {
+                    "runtime": "now"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "op": "ne",
+            "args": [
+              {
+                "field": "asked_by"
+              },
+              {
+                "runtime": "actor"
+              }
+            ]
+          }
+        ]
+      },
+      "expressions": {
+        "answered_by": {
+          "runtime": "actor"
+        },
+        "answered_at": {
+          "runtime": "now"
+        }
+      }
+    },
+    "cancel": {
+      "description": "Cancel a pending question",
+      "input": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "expected_revision"
+        ],
+        "additionalProperties": false
+      },
+      "object": "question",
+      "operation": "update",
+      "set": {
+        "status": "cancelled"
+      },
+      "condition": {
+        "op": "eq",
+        "args": [
+          {
+            "field": "status"
+          },
+          {
+            "literal": "pending"
+          }
+        ]
+      }
+    },
+    "expire": {
+      "description": "Expire a pending question only after its deadline",
+      "input": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "expected_revision"
+        ],
+        "additionalProperties": false
+      },
+      "object": "question",
+      "operation": "update",
+      "set": {
+        "status": "expired"
+      },
+      "condition": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "args": [
+              {
+                "field": "status"
+              },
+              {
+                "literal": "pending"
+              }
+            ]
+          },
+          {
+            "op": "gt",
+            "args": [
+              {
+                "field": "expires_at"
+              },
+              {
+                "literal": 0
+              }
+            ]
+          },
+          {
+            "op": "le",
+            "args": [
+              {
+                "field": "expires_at"
+              },
+              {
+                "runtime": "now"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "guide": "Optional communication app for users without a harness and existing harness integrations. Ask saves a pending question. Query pending questions, then a human client calls answer with the current revision. Caller identity is a runtime actor label, not authenticated human identity; never use these answers as installation or privileged approvals. Starter Runner is granted ask/get only and cannot answer. Expiry never means consent. Shared state follows the selected Rhyven collection.",
+  "tests": [
+    {
+      "operation": "execute",
+      "args": {
+        "action": "ask",
+        "args": {
+          "question": "Which audience?",
+          "choices": [
+            "Developers",
+            "Everyone"
+          ]
+        }
+      },
+      "expect": {
+        "data.status": "pending",
+        "data.question": "Which audience?"
+      }
+    },
+    {
+      "operation": "execute",
+      "args": {
+        "action": "cancel",
+        "args": {
+          "id": {
+            "$result": "0.id"
+          },
+          "expected_revision": 1
+        }
+      },
+      "expect": {
+        "data.status": "cancelled"
+      }
+    }
+  ]
+}
