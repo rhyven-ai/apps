@@ -5,16 +5,28 @@ description: Build a Rhyven app using JSON objects, relationships, rules, expres
 
 # Build a declarative Rhyven app
 
-Target: Rhyven 0.4.0-rc.7, app format 2. The distributable app is a JSON manifest.
+Target: Rhyven 0.5.2, app format 2. The distributable app is a JSON manifest.
 Rhyven interprets its operations and stores records in collection-scoped SQLite.
 Authors do not compile a binary, create a Dockerfile, or write a custom MCP server.
+
+## Marketplace source requirement
+
+For now, apps submitted to the public Rhyven marketplace must be open source.
+Provide a publicly accessible source repository with an OSI-approved license in
+LICENSE. Publish the source corresponding to the submitted release, including
+app logic, manifests and container build files when applicable; a public binary
+or image alone is insufficient. Community apps do not have to use Apache-2.0.
+This is a marketplace submission policy, not a restriction on private local apps.
+Do not publish a private repository or relicense code without user authorization.
 
 ## Choose the execution model
 
 Use declarative apps for records, relationships, search, controlled state
 transitions, arithmetic, string normalization, and immutable knowledge entries.
-Use an on-demand container for arbitrary code, filesystem processing, external
-APIs, or complex algorithms. Use a persistent service for background work.
+Use native Python/JavaScript scripts for custom algorithms, file processing or
+API calls when user-level host access is acceptable. Use an on-demand container
+for packaged system dependencies, other languages or enforced isolation. Use a
+persistent container service when a process must keep running between calls.
 
 Declarative actions perform one create/get/query/update on one object type.
 They cannot run Python, shell commands, loops, multi-record transactions,
@@ -135,3 +147,6 @@ functions are generated as `object_item_query`, `object_item_create`, and
 
 Deliver the app manifest, guide, behavior tests, package, and validation results.
 Use the publishing skill when the user wants marketplace distribution.
+
+In 0.5+, actions may include optional `keywords` (up to 16 strings, each 1–64
+bytes) to improve discovery without changing execution. Use the 0.5 validator.

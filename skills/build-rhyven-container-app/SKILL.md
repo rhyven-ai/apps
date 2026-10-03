@@ -5,14 +5,33 @@ description: Build a Rhyven on-demand container app with arbitrary Python or oth
 
 # Build an on-demand container app
 
-Target: Rhyven 0.4.0-rc.7, app format 2, protocol `rhyven.container/1`.
+Target: Rhyven 0.5.2, app format 2, protocol `rhyven.container/1`.
 Use this mode for custom calculations, parsers, code analysis, and API clients.
 Rhyven starts a container for an action, sends JSON on stdin, validates its
 response, and retains `/data` between calls. Use service mode for background work.
 
 The image contains the language runtime and dependencies. Recipients need a
 compatible local Docker Engine, not Python or a host virtual environment.
-Advertise tested platforms only: Linux is supported; macOS is a feedback preview.
+Advertise tested platforms only: the current Rhyven preview supports Linux.
+
+## Marketplace source requirement
+
+For now, apps submitted to the public Rhyven marketplace must be open source.
+Provide a publicly accessible source repository with an OSI-approved license in
+LICENSE. Publish the source corresponding to the submitted release, including
+app logic, manifests and container build files when applicable; a public binary
+or image alone is insufficient. Community apps do not have to use Apache-2.0.
+This is a marketplace submission policy, not a restriction on private local apps.
+Do not publish a private repository or relicense code without user authorization.
+
+## Choose this backend
+
+Use a container for system packages, compiled dependencies, another language,
+a pinned OS environment or container-enforced access/resource restrictions.
+For Python/JavaScript with supported locked dependencies and approved host
+access, native scripts avoid Docker. Declarative operations need neither.
+An on-demand container exits after each action but can retain data in `/data`.
+Choose a persistent service only when the process must remain running.
 
 ## Scaffold the complete contract
 
@@ -144,3 +163,6 @@ is only suitable for local trials. Test that exact release digest again.
 Deliver app.json, implementation, Dockerfile, guide, tests, package and results.
 Use the publishing skill for release assets and the registry PR. Installation
 alone does not start a server; agents still use discover, describe, and call.
+
+In 0.5+, actions may include optional `keywords` (up to 16 strings, each 1–64
+bytes) to improve discovery without changing execution. Use the 0.5 validator.

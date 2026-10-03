@@ -1,0 +1,94 @@
+{
+  "format": 2,
+  "name": "example/script-python",
+  "version": "0.1.0",
+  "publisher": "example",
+  "description": "Text analysis with python and collection-scoped invocation counts.",
+  "hosting": {
+    "mode": "local"
+  },
+  "execution": {
+    "driver": "script",
+    "protocol": "rhyven.action/1",
+    "language": "python",
+    "entrypoint": "main.py",
+    "environment": "isolated",
+    "timeout_seconds": 30,
+    "python_version": "3.10"
+  },
+  "permissions": [
+    "state.read",
+    "state.write",
+    "host.execute"
+  ],
+  "objects": {},
+  "actions": {
+    "analyze": {
+      "description": "Count words and calculate a SHA-256 checksum; track calls within this collection.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "words": {
+            "type": "integer"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "calls": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "words",
+          "sha256",
+          "calls"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "guide": "Call action_analyze with text. Supply a unique request_id for retry tracking. Each collection has its own invocation counter. This is unsandboxed host code; approve host.execute only for reviewed apps.",
+  "tests": [
+    {
+      "operation": "execute",
+      "args": {
+        "action": "analyze",
+        "args": {
+          "text": "hello world"
+        }
+      },
+      "expect": {
+        "words": 2,
+        "calls": 1
+      }
+    },
+    {
+      "operation": "execute",
+      "args": {
+        "action": "analyze",
+        "args": {
+          "text": "hello"
+        }
+      },
+      "expect": {
+        "words": 1,
+        "calls": 2
+      }
+    }
+  ],
+  "files": [
+    "main.py"
+  ]
+}

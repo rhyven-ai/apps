@@ -54,20 +54,25 @@ class Client:
         self.capabilities = {}
         self.encoding = 'utf-16'
         self.process = None
+        self.own_group = os.environ.get('RHYVEN_SCRIPT_ACTION') != '1'
         command = list(SERVERS[language])
         if language == 'java':
             command += ['-data', str(cache / 'jdt-workspace'), '-configuration', str(cache / 'jdt-config'), '--jvm-arg=-Xms128m', '--jvm-arg=-Xmx1024m', '--jvm-arg=-Duser.home='+str(cache)]
         env = dict(os.environ, XDG_CACHE_HOME=str(cache), GOPATH=str(cache/'go'), GOCACHE=str(cache/'go-build'), GOPROXY='off', GOSUMDB='off', GOTOOLCHAIN='local', CARGO_HOME=str(cache/'cargo'))
         cache.mkdir(parents=True, exist_ok=True)
         try:
-            self.process = subprocess.Popen(command, cwd=self.root, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, bufsize=0, start_new_session=True)
+            self.process = subprocess.Popen(command, cwd=self.root, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, bufsize=0, start_new_session=self.own_group)
             self.selector = selectors.DefaultSelector()
             self.selector.register(self.process.stdout, selectors.EVENT_READ)
             initialization = {'settings':SETTINGS, 'preferences':{'allowLocalPluginLoads':False}, 'hostInfo':'code-atlas'}
             if language=='rust': initialization=SETTINGS['rust-analyzer']
             if language in ('javascript','typescript'):
                 initialization.update(disableAutomaticTypingAcquisition=True,maxTsServerMemory=768)
-                initialization['tsserver']={'path':'/opt/ls/node_modules/typescript/lib/tsserver.js','useSyntaxServer':'never'}
+                server = Path(shutil.which(command[0])).resolve()
+                tsserver = server.parents[2] / 'typescript/lib/tsserver.js'
+                if not tsserver.is_file():
+                    raise LspError('Install TypeScript alongside typescript-language-server')
+                initialization['tsserver']={'path':str(tsserver),'useSyntaxServer':'never'}
             result = self.request('initialize', {'processId':os.getpid(), 'rootUri':self.root.as_uri(), 'workspaceFolders':[{'uri':self.root.as_uri(),'name':self.root.name}],
                 'capabilities':{'general':{'positionEncodings':['utf-16']}, 'workspace':{'configuration':True,'workspaceFolders':True}, 'textDocument':{'documentSymbol':{'hierarchicalDocumentSymbolSupport':True},'callHierarchy':{'dynamicRegistration':False}}},
                 'initializationOptions':initialization}, timeout=40)
@@ -155,10 +160,13 @@ class Client:
         process=self.process
         if process is not None:
             if process.poll() is None:
-                os.killpg(process.pid,signal.SIGTERM)
+                if self.own_group: os.killpg(process.pid,signal.SIGTERM)
+                else: process.terminate()
                 try: process.wait(timeout=2)
                 except subprocess.TimeoutExpired:
-                    os.killpg(process.pid,signal.SIGKILL); process.wait(timeout=2)
+                    if self.own_group: os.killpg(process.pid,signal.SIGKILL)
+                    else: process.kill()
+                    process.wait(timeout=2)
             for stream in (process.stdin,process.stdout):
                 if stream: stream.close()
         if hasattr(self,'selector'): self.selector.close()

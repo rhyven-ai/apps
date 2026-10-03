@@ -5,9 +5,19 @@ description: Prepare, test, package, and submit a Rhyven app to the GitHub-backe
 
 # Publish a Rhyven app
 
-Target: Rhyven 0.4.0-rc.7, app format 2. Use the installed CLI's `--help`
+Target: Rhyven 0.5.2, app format 2. Use the installed CLI's `--help`
 to resolve version differences. This workflow needs Rhyven, Git, and authenticated
 GitHub CLI access to the publisher's repository. Container apps also need Docker.
+
+## Marketplace source requirement
+
+For now, apps submitted to the public Rhyven marketplace must be open source.
+Provide a publicly accessible source repository with an OSI-approved license in
+LICENSE. Publish the source corresponding to the submitted release, including
+app logic, manifests and container build files when applicable; a public binary
+or image alone is insufficient. Community apps do not have to use Apache-2.0.
+This is a marketplace submission policy, not a restriction on private local apps.
+Do not publish a private repository or relicense code without user authorization.
 
 ## Establish the release target
 
@@ -38,6 +48,25 @@ rhyven app package ./my-app --out ./my-app.rhyven.json
 ```
 
 The commands above are for a declarative app. Packaging runs its behavior tests.
+For native Python/JavaScript apps, use rc.9 or newer. Include source and lockfiles
+in the manifest's `files` list; package the directory so Rhyven embeds those files.
+Review `host.execute`: tests run unsandboxed as the OS user. Execute tests only
+within the user's authorized scope, in disposable app state:
+
+```sh
+rhyven app test ./my-app --allow-host
+rhyven app package ./my-app --out ./my-app.rhyven.json
+rhyven app validate ./my-app.rhyven.json
+rhyven app test ./my-app.rhyven.json --allow-host
+```
+
+Native validation/packaging does not run code or install dependencies. Confirm
+compatible Python/Node and venv/pip or npm support. Pin and hash all dependencies;
+pip accepts wheels only and npm install scripts are disabled. Report host test
+results separately from schema validation. No Docker image is uploaded for a
+native app. Do not convert a published container app to script as an in-place
+update; plan a separate installation and explicit state migration.
+
 For containers/services, build and test the image explicitly, then publish that
 image to a registry recipients can access. The image includes executable code;
 the JSON package references it rather than embedding the build directory.
@@ -121,6 +150,18 @@ For a persistent service, start the daemon with the same home before starting
 the app. Follow its service skill for readiness, stop, and restart checks.
 
 Registry validation checks schemas, metadata, byte hashes, and declarative tests;
-it does not execute container code. Report Docker execution tests separately.
+it does not execute publisher code. Report native and Docker execution tests separately.
 Deliver the package, image digest if used, registry entry, release/PR links,
 validation results, and any remaining installation or review blockers.
+
+## Connector packages (0.5+)
+
+Use `rhyven app import-mcp` or `rhyven app import-openapi` with an explicit tool/
+operation allowlist; inspect `--help` and https://rhyvenai.com/#docs/connectors for supported inputs.
+Provide the upstream service separately. Review imported schemas, Markdown guidance,
+endpoint, permissions and credential variable name. Never embed credentials.
+Keep the public package source open source under the current marketplace policy.
+`app test` validates the contract, not remote behavior: test against a disposable
+service before submission. Upstream code/behavior is not pinned by package hashes.
+Require a compatible 0.5+ runtime and registry validator for connector packages. Auth is currently configured bearer-token environment
+variables; stdio launching, OAuth login and arbitrary OpenAPI schemas are not provided.

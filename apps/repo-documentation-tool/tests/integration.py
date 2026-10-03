@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """Real installed-app acceptance. Run with Docker and a built image ID file.
 python3 apps/repo-documentation-tool/tests/integration.py /path/to/rhyven /tmp/image.id
+Use --script instead of the image ID file for the native variant.
 """
 import json
 import os
@@ -17,7 +18,8 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from repository_client import AgentClient, import_files
 
 binary=str(Path(sys.argv[1]).resolve())
-image=Path(sys.argv[2]).read_text().strip()
+native = sys.argv[2] == '--script'
+image = None if native else Path(sys.argv[2]).read_text().strip()
 source=Path(__file__).resolve().parents[1]
 
 def log(text): print(text,flush=True)
@@ -29,9 +31,14 @@ with tempfile.TemporaryDirectory(prefix='code-atlas-acceptance-') as temp:
         assert result.returncode==0,result.stderr
         return json.loads(result.stdout)
     bundle=home/'package.json'
-    cli('app','package',str(source),'--image',image,'--out',str(bundle))
-    log('Package built; running real container conformance')
-    assert cli('app','test',str(bundle),'--allow-container')['passed']
+    if native:
+        native_source = home / 'native-source'
+        subprocess.run([sys.executable, str(source/'package_script.py'), '--out', str(native_source)], check=True)
+        cli('app', 'package', str(native_source), '--out', str(bundle))
+    else:
+        cli('app','package',str(source),'--image',image,'--out',str(bundle))
+    log('Package built; running installed execution conformance')
+    assert cli('app','test',str(bundle),'--allow-host' if native else '--allow-container')['passed']
     cli('install',str(bundle),'--accept-permissions')
     client=AgentClient(binary,str(home))
     def call(action,**args):return client.call(action,dict(repository='fixture',**args))
@@ -143,11 +150,22 @@ with tempfile.TemporaryDirectory(prefix='code-atlas-acceptance-') as temp:
             'javascript':{'main.js':'function increment(value) { return value + 1; }\nclass Counter { count(value) { return increment(value); } }\n'},
             'typescript':{'main.ts':'function increment(value: number): number { return value + 1; }\nclass Counter { count(value: number): number { return increment(value); } }\n'},
         }
+        tested_languages = ["python"]
+        unavailable_languages = []
         for language,files in fixtures.items():
             log('Testing real '+language+' language server')
             client.call('put_files',{'repository':language,'files':[{'path':p,'content':c} for p,c in files.items()]})
+            if native:
+                survey = client.call('survey', {'repository':language})
+                if not all(item['available'] for item in survey['languages']):
+                    missing = client.call('scan', {'repository':language})
+                    assert not missing['complete'] and missing['issues'], missing
+                    unavailable_languages.append(language)
+                    log('Unavailable host language server reported: '+language)
+                    continue
             result=client.call('scan',{'repository':language})
             log(json.dumps(result))
             assert result['complete'] and result['symbols']>=1,(language,result)
-        log('PASS: all eight additional language fixtures; installed app acceptance complete')
+            tested_languages.append(language)
+        log('PASS: installed app acceptance; tested='+','.join(tested_languages)+'; unavailable='+','.join(unavailable_languages))
     finally:client.close()
