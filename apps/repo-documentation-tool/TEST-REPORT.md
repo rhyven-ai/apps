@@ -131,3 +131,31 @@ published and accepted. Source availability alone is not an image-release test.
 
 Reproduce with the commands in [README.md](README.md). Set `RHYVEN_TEST_ARTIFACTS` to an explicit output directory to retain
 synthetic fixture artifacts. By default, acceptance state is temporary.
+
+## Header package reassessment — 2026-10-03
+
+The [candidate image audit](https://github.com/rhyven-ai/rhyven/actions/runs/37145695026)
+built and passed functional integration for version 0.1.1. Its scan failed because
+Ubuntu installed `linux-libc-dev` version `6.8.0-146.146`, while the previous
+assessment covered only `6.8.0-142.142`.
+
+Evidence from the same image:
+
+- Image ID: `sha256:f4d24791fa2c2ae5ae2cd9e7a3b098685dd217cfd1d8acd37a6d679a1ee889e0`.
+- Package inventory: 990 regular-file paths, all `.h` files below `/usr/include/`
+  or documentation below `/usr/share/doc/linux-libc-dev/`. No kernel executable.
+- Inventory SHA-256: `5a15802d74dc2627710dab673e69c73f7099bc42074f3b81f1eda0e56b2f44d0`.
+- All 168 high/critical findings belong to that header package and describe
+  kernel vulnerabilities. No other high/critical findings or secrets were reported.
+
+The reviewed package supplies interfaces for code analysis; its kernel advisories
+do not identify executable kernel code in this image. The host kernel remains
+the operator's responsibility. This is an applicability assessment, not a claim
+that the host kernel is patched or that no lower-severity findings exist.
+
+The gate now covers only the new exact package version, requires the package
+inventory and scan to identify the same image, checks every inventoried path,
+and applies the assessment only to findings whose description identifies the
+kernel. All other high/critical findings and secrets still block release.
+The original expiry, **2026-10-11**, is unchanged. Publication rebuilds, tests,
+scans and inventories its exact image again; the audit image is not blindly reused.
