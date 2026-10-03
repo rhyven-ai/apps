@@ -20,11 +20,10 @@ Review the manifest before accepting permissions. The source manifest contains a
 placeholder image ID: package with the actual built image. For distribution, push
 the image to a registry and package with its immutable `repository@sha256:...`
 digest; a local image ID only works on the machine where that image exists.
-Source version **0.1.1** is the security update candidate. Public version 0.1.0
-remains in `rhyven-ai/registry`; do not reuse that version or replace its image
-digest. Publish the tested 0.1.1 image and package after the security gate passes,
-then update the registry and website availability together. The candidate upgrades
-JDT LS to 1.61.0 and removes unused pip/CI material from the runtime image.
+Version **0.1.1** upgrades JDT LS to 1.61.0 and removes unused pip/CI material
+from the runtime image. The marketplace package pins the tested image digest;
+previous versions remain immutable. See [the test report](TEST-REPORT.md) for
+integration results and the scoped header-package security assessment.
 
 The image supplies Python, Pyright, clangd, fortls, gopls, rust-analyzer, JDTLS and
 the TypeScript language server. JavaScript and TypeScript share the latter. The

@@ -19,8 +19,7 @@ engine is also open source under Apache-2.0, in the separate
 | Messaging | [source and build instructions](apps/messaging/README.md) | Persistent container |
 | Rhyven Repo Documentation Tool | [source and build instructions](apps/repo-documentation-tool/README.md) | On-demand container or native Python |
 
-CI Management records pipeline state; it does not execute builds. Messaging 0.1.1 is published. Repo Documentation Tool 0.1.1 remains a source
-candidate pending its image security review. Check the
+CI Management records pipeline state; it does not execute builds. Messaging and Repo Documentation Tool use container images. Check the
 [public registry](https://github.com/rhyven-ai/registry) for installable versions
 and immutable image digests; publishing source does not release a new image.
 
