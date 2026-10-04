@@ -54,3 +54,13 @@ apps and scope; this rule grants no additional authorization.
   rhyven_call and marketplace installation keep their normal approval requirements.
 - Connector apps call existing external services; installation does not start them.
   Do not retry uncertain writes without checking external state or upstream idempotency.
+
+- Look for repeated operations, missing tools and project-specific checks that
+  would make useful reusable apps. Search installed apps and the marketplace
+  first. Propose a small app when it materially helps the task and is likely to
+  be reused; use ordinary commands for one-off work.
+- Explain the proposed app's purpose, inputs, outputs and permissions. Build
+  within the user's authorized scope, validate and test it, and follow the
+  installation consent flow above. Publishing requires separate authorization.
+  Use the installed app through the existing interface and stay focused on the
+  original task.

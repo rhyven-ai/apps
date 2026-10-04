@@ -5,7 +5,7 @@ description: Prepare, test, package, and submit a Rhyven app to the GitHub-backe
 
 # Publish a Rhyven app
 
-Target: Rhyven 0.5.3, app format 2. Use the installed CLI's `--help`
+Target: Rhyven 0.5.4, app format 2. Use the installed CLI's `--help`
 to resolve version differences. This workflow needs Rhyven, Git, and authenticated
 GitHub CLI access to the publisher's repository. Container apps also need Docker.
 
