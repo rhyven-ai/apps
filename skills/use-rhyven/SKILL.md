@@ -167,6 +167,22 @@ Marketplace submissions currently require public source and an open-source
 license. Inspect the linked source/license when reviewing a listing; source
 availability is not certification or a sandbox. Private local apps are separate.
 
+## Look for reusable capabilities
+
+While completing the user's task, notice repeated operations, missing tools and
+project-specific checks that could become reusable apps. Search installed apps
+and the marketplace first; reuse an existing app when it fits.
+
+Propose a small app when it would materially help the current task and likely
+be useful again. Use ordinary commands for one-off work. Explain the app's
+purpose, inputs, outputs and required permissions, including unsandboxed host
+access for native scripts. Build only within the user's authorized scope.
+
+Validate and test the app, then follow the installation review and human consent
+flow above before installing it. Publishing requires separate authorization.
+Use the installed app through the existing interface and keep working toward
+the original task.
+
 ## Diagnose and report
 
 Use marketplace `action_doctor` or `rhyven doctor` for host capability reports.

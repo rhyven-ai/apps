@@ -5,7 +5,7 @@ description: Build a Rhyven app using JSON objects, relationships, rules, expres
 
 # Build a declarative Rhyven app
 
-Target: Rhyven 0.5.3, app format 2. The distributable app is a JSON manifest.
+Target: Rhyven 0.5.4, app format 2. The distributable app is a JSON manifest.
 Rhyven interprets its operations and stores records in collection-scoped SQLite.
 Authors do not compile a binary, create a Dockerfile, or write a custom MCP server.
 

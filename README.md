@@ -26,7 +26,7 @@ and immutable image digests; publishing source does not release a new image.
 ## Use or modify an app
 
 Install a compatible Rhyven binary separately. These apps use manifest format 2
-and the three-tool interface in Rhyven 0.5.3. Linux is the tested container platform; check the runtime's platform
+and the three-tool interface in Rhyven 0.5.4. Linux is the tested container platform; check the runtime's platform
 requirements and license terms. No Rust source build is needed to author an app.
 
 From this repository's root:

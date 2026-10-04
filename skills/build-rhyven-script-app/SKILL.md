@@ -5,7 +5,7 @@ description: Build and test a native Python or JavaScript Rhyven app without Doc
 
 # Build a native script app
 
-Target: Rhyven 0.5.3, app format 2, protocol `rhyven.action/1`.
+Target: Rhyven 0.5.4, app format 2, protocol `rhyven.action/1`.
 Linux is the tested platform. Native Windows execution is unsupported.
 Use the installed runtime's `--help` and generated scaffold as the contract.
 
