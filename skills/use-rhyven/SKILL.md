@@ -217,3 +217,19 @@ current manifest advertises them.
 `rhyven upgrade --check` checks the engine version. Updating app packages does not
 update the engine. Runtime upgrades require restarting long-running processes;
 coordinate that with the user on shared hosts.
+
+## Headless onboarding
+
+Install the runtime without `--containers` unless container support is needed.
+Optional Docker setup may remain pending while the declarative runtime is ready.
+Use the same `--collection` for connection and subsequent calls. `connect --check`
+performs a real MCP handshake without model credentials; it verifies the server,
+not a live client session. Configuration written does not mean the client is installed.
+For Cline, locate the active file in MCP Servers → Configure → Configure MCP Servers
+and pass `--config`; do not guess between profiles.
+
+On a host without a human terminal or MCP elicitation, search and prepare requests,
+then report the approval requirement. Ask the operator to approve/install required
+apps before unattended work. Never self-approve or bypass the consent gate.
+The three `rhyven_*` tools are top-level; app functions use
+`rhyven_call(category, function, args)`.
