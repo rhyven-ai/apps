@@ -1,0 +1,48 @@
+{
+  "cases": [
+    {
+      "expected_pass": true,
+      "files": [
+        {
+          "content": "# Sample\n",
+          "path": "README.md"
+        },
+        {
+          "content": "{\"enabled\":true}",
+          "path": "config.json"
+        }
+      ],
+      "id": "healthy",
+      "snapshot_hash": "381abf603b7249c12c473d69dfbf069e29a9b874a64278338a484b7fa64ff5b6"
+    },
+    {
+      "expected_pass": false,
+      "files": [
+        {
+          "content": "{}",
+          "path": "config.json"
+        }
+      ],
+      "id": "missing-readme",
+      "snapshot_hash": "03e51b1a03de028b5b88bff308e274298aabc7e5d63452eabd2348b14932bff2"
+    },
+    {
+      "expected_pass": false,
+      "files": [
+        {
+          "content": "# Sample\n",
+          "path": "README.md"
+        },
+        {
+          "content": "{broken",
+          "path": "config.json"
+        }
+      ],
+      "id": "broken-json",
+      "snapshot_hash": "3c47dac3b6c8734cac717bead82ac1f2fb5d62722c91e8021e443fe612a4047e"
+    }
+  ],
+  "name": "release",
+  "suite_hash": "ad6e4cbaa9f61c975a6777535383f846d25999d24291413195944f206048165a",
+  "version": "1"
+}

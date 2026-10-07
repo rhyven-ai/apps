@@ -1,0 +1,25 @@
+{
+  "app": "rhyven/failure-to-regression",
+  "created_at": 1791415427,
+  "data": {
+    "case_id": "broken-json",
+    "expected_pass": false,
+    "failure_id": "55f9c25fcf6e4165974e2adea292d0ea",
+    "files": [
+      {
+        "content": "# Sample\n",
+        "path": "README.md"
+      },
+      {
+        "content": "{broken",
+        "path": "config.json"
+      }
+    ],
+    "notes": "This must fail even when both required files exist."
+  },
+  "id": "f821a2fe5f6d4082815b07a244f5444e",
+  "object": "regression",
+  "revision": 1,
+  "updated_at": 1791415427,
+  "updated_by": "quality-builder"
+}

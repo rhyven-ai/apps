@@ -1,0 +1,40 @@
+[
+  {
+    "id": "healthy",
+    "files": [
+      {
+        "path": "README.md",
+        "content": "# Sample\n"
+      },
+      {
+        "path": "config.json",
+        "content": "{\"enabled\":true}"
+      }
+    ],
+    "expected_pass": true
+  },
+  {
+    "id": "missing-readme",
+    "files": [
+      {
+        "path": "config.json",
+        "content": "{}"
+      }
+    ],
+    "expected_pass": false
+  },
+  {
+    "id": "broken-json",
+    "files": [
+      {
+        "path": "README.md",
+        "content": "# Sample\n"
+      },
+      {
+        "path": "config.json",
+        "content": "{broken"
+      }
+    ],
+    "expected_pass": false
+  }
+]

@@ -1,0 +1,714 @@
+{
+  "format": 2,
+  "name": "rhyven/preflight-checker",
+  "display_name": "Preflight Checker",
+  "version": "0.1.0",
+  "publisher": "rhyven",
+  "description": "Run versioned checks on supplied project snapshots; save reports and reuse improved policies. Python standard library; no Docker.",
+  "hosting": {
+    "mode": "local"
+  },
+  "permissions": [
+    "state.read",
+    "state.write",
+    "host.execute"
+  ],
+  "objects": {},
+  "actions": {
+    "save_policy": {
+      "description": "Save an immutable named policy version. New checks require a new version; returns policy_hash.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1
+          },
+          "version": {
+            "type": "string",
+            "maxLength": 40,
+            "minLength": 1
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 80,
+                  "minLength": 1
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "exists",
+                    "contains",
+                    "not_contains",
+                    "json_valid",
+                    "json_equals",
+                    "python_syntax"
+                  ]
+                },
+                "path": {
+                  "type": "string",
+                  "maxLength": 200,
+                  "minLength": 1
+                },
+                "text": {
+                  "type": "string",
+                  "maxLength": 4000
+                },
+                "keys": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "maxLength": 100
+                  },
+                  "maxItems": 16
+                },
+                "expected_json": {
+                  "type": "string",
+                  "maxLength": 4000
+                }
+              },
+              "required": [
+                "id",
+                "kind",
+                "path"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "checks"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "version": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 80,
+                  "minLength": 1
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "exists",
+                    "contains",
+                    "not_contains",
+                    "json_valid",
+                    "json_equals",
+                    "python_syntax"
+                  ]
+                },
+                "path": {
+                  "type": "string",
+                  "maxLength": 200,
+                  "minLength": 1
+                },
+                "text": {
+                  "type": "string",
+                  "maxLength": 4000
+                },
+                "keys": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "maxLength": 100
+                  },
+                  "maxItems": 16
+                },
+                "expected_json": {
+                  "type": "string",
+                  "maxLength": 4000
+                }
+              },
+              "required": [
+                "id",
+                "kind",
+                "path"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 100
+          },
+          "policy_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "checks",
+          "policy_hash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "run": {
+      "description": "Check a supplied snapshot without executing its code or reading host project paths. Returns persisted report, input hash and check-only elapsed time.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "policy_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 200,
+                  "minLength": 1
+                },
+                "content": {
+                  "type": "string",
+                  "maxLength": 200000
+                }
+              },
+              "required": [
+                "path",
+                "content"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "policy_hash",
+          "files"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "policy_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64
+          },
+          "policy_name": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "policy_version": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "snapshot_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                "path": {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "passed": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string",
+                  "maxLength": 200
+                }
+              },
+              "required": [
+                "id",
+                "path",
+                "passed",
+                "message"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 100
+          },
+          "failed_checks": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 80
+            },
+            "maxItems": 100
+          },
+          "duration_ms": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "run_id",
+          "policy_hash",
+          "policy_name",
+          "policy_version",
+          "snapshot_hash",
+          "passed",
+          "checks",
+          "failed_checks",
+          "duration_ms"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "get_policy": {
+      "description": "Read a saved policy by hash in this collection.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "policy_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64
+          }
+        },
+        "required": [
+          "policy_hash"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "version": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 80,
+                  "minLength": 1
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "exists",
+                    "contains",
+                    "not_contains",
+                    "json_valid",
+                    "json_equals",
+                    "python_syntax"
+                  ]
+                },
+                "path": {
+                  "type": "string",
+                  "maxLength": 200,
+                  "minLength": 1
+                },
+                "text": {
+                  "type": "string",
+                  "maxLength": 4000
+                },
+                "keys": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "maxLength": 100
+                  },
+                  "maxItems": 16
+                },
+                "expected_json": {
+                  "type": "string",
+                  "maxLength": 4000
+                }
+              },
+              "required": [
+                "id",
+                "kind",
+                "path"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 100
+          },
+          "policy_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "checks",
+          "policy_hash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "get_run": {
+      "description": "Read a persisted run, including individual check results.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          }
+        },
+        "required": [
+          "run_id"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "policy_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64
+          },
+          "policy_name": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "policy_version": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "snapshot_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                "path": {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "passed": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string",
+                  "maxLength": 200
+                }
+              },
+              "required": [
+                "id",
+                "path",
+                "passed",
+                "message"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 100
+          },
+          "failed_checks": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 80
+            },
+            "maxItems": 100
+          },
+          "duration_ms": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "run_id",
+          "policy_hash",
+          "policy_name",
+          "policy_version",
+          "snapshot_hash",
+          "passed",
+          "checks",
+          "failed_checks",
+          "duration_ms"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "list_policies": {
+      "description": "List recent policy summaries; get_policy returns their full check definitions.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 20
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                "version": {
+                  "type": "string",
+                  "maxLength": 40
+                },
+                "policy_hash": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "minLength": 64
+                }
+              },
+              "required": [
+                "name",
+                "version",
+                "policy_hash"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "list_runs": {
+      "description": "List recent persisted report summaries in this collection.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 20
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "run_id": {
+                  "type": "string",
+                  "maxLength": 100,
+                  "minLength": 1
+                },
+                "policy_hash": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "minLength": 64
+                },
+                "policy_name": {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                "policy_version": {
+                  "type": "string",
+                  "maxLength": 40
+                },
+                "snapshot_hash": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "minLength": 64
+                },
+                "passed": {
+                  "type": "boolean"
+                },
+                "failed_checks": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "maxLength": 80
+                  },
+                  "maxItems": 100
+                },
+                "duration_ms": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "run_id",
+                "policy_hash",
+                "policy_name",
+                "policy_version",
+                "snapshot_hash",
+                "passed",
+                "failed_checks",
+                "duration_ms"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "execution": {
+    "driver": "script",
+    "protocol": "rhyven.action/1",
+    "language": "python",
+    "entrypoint": "main.py",
+    "environment": "isolated",
+    "timeout_seconds": 30,
+    "python_version": "3.10"
+  },
+  "files": [
+    "main.py",
+    "common.py",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "guide": "Use action_save_policy, then action_run with explicit UTF-8 file snapshots. Supported checks: exists, contains, not_contains, json_valid, json_equals (object keys and expected_json), python_syntax (parse only). Paths are normalized relative POSIX identifiers; no automatic repository scan or code execution. Missing files fail every check kind. JSON rejects duplicate keys and non-finite numbers. Policies are immutable per name/version. Improve with a new policy version, keep baseline reports, and compare both against the SAME Workflow Evaluator suite. The calling agent transfers cases/reports and links failures through Failure-to-Regression. Lists return summaries; get actions return full records. State is SQLite under RHYVEN_DATA_DIR, scoped by app and collection. Python 3.10+, no pip dependencies or Docker. host.execute is unsandboxed OS-user access despite this implementation using only supplied inputs and its data directory. Installation needs human approval. Code changes require a new app package/version and update approval; policy changes are normal app state, not executable code.",
+  "tests": [
+    {
+      "operation": "execute",
+      "args": {
+        "action": "save_policy",
+        "args": {
+          "name": "smoke",
+          "version": "1",
+          "checks": [
+            {
+              "id": "config",
+              "kind": "json_valid",
+              "path": "config.json"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "version": "1"
+      }
+    },
+    {
+      "operation": "execute",
+      "args": {
+        "action": "run",
+        "args": {
+          "policy_hash": {
+            "$result": "0.policy_hash"
+          },
+          "files": [
+            {
+              "path": "config.json",
+              "content": "{\"ok\":true}"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "passed": true
+      }
+    },
+    {
+      "operation": "execute",
+      "args": {
+        "action": "run",
+        "args": {
+          "policy_hash": {
+            "$result": "0.policy_hash"
+          },
+          "files": [
+            {
+              "path": "config.json",
+              "content": "{broken"
+            }
+          ]
+        }
+      },
+      "expect": {
+        "passed": false,
+        "failed_checks": [
+          "config"
+        ]
+      }
+    }
+  ]
+}

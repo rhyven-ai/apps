@@ -1,0 +1,21 @@
+{
+  "app": "rhyven/failure-to-regression",
+  "created_at": 1791415427,
+  "data": {
+    "evaluation_id": "5b6b2248-99bf-4d34-bdef-a11684ea42d8",
+    "fix_summary": "Policy version 2 validates JSON as well as requiring files.",
+    "project": "sample-release",
+    "reproduction": "Supply config.json containing {broken and a README.md",
+    "source_app": "rhyven/preflight-checker",
+    "source_record_id": "4440a4ad-e5f7-44fb-800d-219cb261d128",
+    "status": "fixed",
+    "suite_hash": "ad6e4cbaa9f61c975a6777535383f846d25999d24291413195944f206048165a",
+    "symptom": "The release checker accepts malformed config.json",
+    "title": "Broken JSON accepted"
+  },
+  "id": "55f9c25fcf6e4165974e2adea292d0ea",
+  "object": "failure",
+  "revision": 2,
+  "updated_at": 1791415428,
+  "updated_by": "quality-builder"
+}

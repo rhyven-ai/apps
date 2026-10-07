@@ -1,0 +1,477 @@
+{
+  "format": 2,
+  "name": "rhyven/failure-to-regression",
+  "display_name": "Failure-to-Regression",
+  "version": "0.1.0",
+  "publisher": "rhyven",
+  "description": "Track failures, preserve reproducible regression fixtures and link fixes to evaluator evidence. Declarative; no Python or Docker.",
+  "hosting": {
+    "mode": "local"
+  },
+  "permissions": [
+    "state.read",
+    "state.write"
+  ],
+  "objects": {
+    "failure": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "symptom": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1
+          },
+          "reproduction": {
+            "type": "string",
+            "maxLength": 8000,
+            "minLength": 1
+          },
+          "source_app": {
+            "type": "string",
+            "maxLength": 200,
+            "default": ""
+          },
+          "source_record_id": {
+            "type": "string",
+            "maxLength": 100,
+            "default": ""
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "fixed"
+            ],
+            "default": "open"
+          },
+          "fix_summary": {
+            "type": "string",
+            "maxLength": 4000,
+            "default": ""
+          },
+          "evaluation_id": {
+            "type": "string",
+            "maxLength": 100,
+            "default": ""
+          },
+          "suite_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "default": ""
+          }
+        },
+        "required": [
+          "title",
+          "project",
+          "symptom",
+          "reproduction"
+        ],
+        "additionalProperties": false
+      },
+      "search_fields": [
+        "title",
+        "project",
+        "symptom",
+        "reproduction"
+      ],
+      "protected_fields": [
+        "status",
+        "fix_summary",
+        "evaluation_id",
+        "suite_hash"
+      ],
+      "transitions": {
+        "status": {
+          "open": [
+            "fixed"
+          ],
+          "fixed": [
+            "open"
+          ]
+        }
+      }
+    },
+    "regression": {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "failure_id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "case_id": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 200,
+                  "minLength": 1
+                },
+                "content": {
+                  "type": "string",
+                  "maxLength": 200000
+                }
+              },
+              "required": [
+                "path",
+                "content"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 100
+          },
+          "expected_pass": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 4000,
+            "default": ""
+          }
+        },
+        "required": [
+          "failure_id",
+          "case_id",
+          "files",
+          "expected_pass"
+        ],
+        "additionalProperties": false
+      },
+      "relationships": {
+        "failure_id": {
+          "object": "failure"
+        }
+      },
+      "search_fields": [
+        "case_id",
+        "notes"
+      ]
+    }
+  },
+  "actions": {
+    "record_failure": {
+      "description": "Record a failure and reproduction steps, optionally linking the source app/run.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1
+          },
+          "project": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "symptom": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1
+          },
+          "reproduction": {
+            "type": "string",
+            "maxLength": 8000,
+            "minLength": 1
+          },
+          "source_app": {
+            "type": "string",
+            "maxLength": 200,
+            "default": ""
+          },
+          "source_record_id": {
+            "type": "string",
+            "maxLength": 100,
+            "default": ""
+          }
+        },
+        "required": [
+          "title",
+          "project",
+          "symptom",
+          "reproduction"
+        ],
+        "additionalProperties": false
+      },
+      "object": "failure",
+      "operation": "create",
+      "set": {
+        "title": {
+          "$arg": "title"
+        },
+        "project": {
+          "$arg": "project"
+        },
+        "symptom": {
+          "$arg": "symptom"
+        },
+        "reproduction": {
+          "$arg": "reproduction"
+        },
+        "source_app": {
+          "$arg": "source_app"
+        },
+        "source_record_id": {
+          "$arg": "source_record_id"
+        }
+      }
+    },
+    "add_regression": {
+      "description": "Save a reproducible snapshot linked to an existing failure. Transfer this fixture to a new evaluator suite version.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "failure_id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "case_id": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 200,
+                  "minLength": 1
+                },
+                "content": {
+                  "type": "string",
+                  "maxLength": 200000
+                }
+              },
+              "required": [
+                "path",
+                "content"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 100
+          },
+          "expected_pass": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 4000,
+            "default": ""
+          }
+        },
+        "required": [
+          "failure_id",
+          "case_id",
+          "files",
+          "expected_pass"
+        ],
+        "additionalProperties": false
+      },
+      "object": "regression",
+      "operation": "create",
+      "set": {
+        "failure_id": {
+          "$arg": "failure_id"
+        },
+        "case_id": {
+          "$arg": "case_id"
+        },
+        "files": {
+          "$arg": "files"
+        },
+        "expected_pass": {
+          "$arg": "expected_pass"
+        },
+        "notes": {
+          "$arg": "notes"
+        }
+      }
+    },
+    "mark_fixed": {
+      "description": "Record a reviewed fix with evaluation and suite references. References to other apps are evidence links, not automatic verification.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "fix_summary": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1
+          },
+          "evaluation_id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "suite_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64
+          }
+        },
+        "required": [
+          "id",
+          "expected_revision",
+          "fix_summary",
+          "evaluation_id",
+          "suite_hash"
+        ],
+        "additionalProperties": false
+      },
+      "object": "failure",
+      "operation": "update",
+      "set": {
+        "status": "fixed",
+        "fix_summary": {
+          "$arg": "fix_summary"
+        },
+        "evaluation_id": {
+          "$arg": "evaluation_id"
+        },
+        "suite_hash": {
+          "$arg": "suite_hash"
+        }
+      },
+      "guard": {
+        "status": "open"
+      }
+    },
+    "reopen": {
+      "description": "Reopen a failure if a later test exposes it again.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "expected_revision"
+        ],
+        "additionalProperties": false
+      },
+      "object": "failure",
+      "operation": "update",
+      "set": {
+        "status": "open",
+        "fix_summary": "",
+        "evaluation_id": "",
+        "suite_hash": ""
+      },
+      "guard": {
+        "status": "fixed"
+      }
+    }
+  },
+  "guide": "Record failures with action_record_failure; action_add_regression stores linked file snapshots and expected_pass. Use generic query/get/search for failure and regression objects; timestamps/revisions come from Rhyven. The calling agent transfers regression files into Workflow Evaluator suites and runs Preflight Checker. Only mark_fixed after examining a real passing candidate evaluation; evaluation_id and suite_hash are cross-app references, NOT a runtime-verified foreign key or installation consent. Existing record revisions protect against stale updates. Reopen if it fails again. This app is entirely declarative: no scripts, network or Docker. It does not execute tests or fix source code. Snapshot text can contain sensitive data; only store reviewed fixtures. App state follows the selected collection; another agent can query and continue the work.",
+  "tests": [
+    {
+      "operation": "execute",
+      "args": {
+        "action": "record_failure",
+        "args": {
+          "title": "Invalid config missed",
+          "project": "sample",
+          "symptom": "Checker accepts broken JSON",
+          "reproduction": "Run with {broken"
+        }
+      },
+      "expect": {
+        "data.status": "open"
+      }
+    },
+    {
+      "operation": "execute",
+      "args": {
+        "action": "add_regression",
+        "args": {
+          "failure_id": {
+            "$result": "0.id"
+          },
+          "case_id": "broken-json",
+          "files": [
+            {
+              "path": "config.json",
+              "content": "{broken"
+            }
+          ],
+          "expected_pass": false
+        }
+      },
+      "expect": {
+        "data.case_id": "broken-json"
+      }
+    },
+    {
+      "operation": "execute",
+      "args": {
+        "action": "mark_fixed",
+        "args": {
+          "id": {
+            "$result": "0.id"
+          },
+          "expected_revision": 1,
+          "fix_summary": "Added JSON validity check",
+          "evaluation_id": "sample-evaluation",
+          "suite_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      },
+      "expect": {
+        "data.status": "fixed"
+      }
+    },
+    {
+      "operation": "execute",
+      "args": {
+        "action": "reopen",
+        "args": {
+          "id": {
+            "$result": "0.id"
+          },
+          "expected_revision": 2
+        }
+      },
+      "expect": {
+        "data.status": "open"
+      }
+    }
+  ]
+}

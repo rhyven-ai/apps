@@ -1,0 +1,926 @@
+{
+  "format": 2,
+  "name": "rhyven/workflow-evaluator",
+  "display_name": "Workflow Evaluator",
+  "version": "0.1.0",
+  "publisher": "rhyven",
+  "description": "Compare tool results against immutable project fixtures; catch regressions and retain evaluation history. Python standard library; no Docker.",
+  "hosting": {
+    "mode": "local"
+  },
+  "permissions": [
+    "state.read",
+    "state.write",
+    "host.execute"
+  ],
+  "objects": {},
+  "actions": {
+    "save_suite": {
+      "description": "Save an immutable fixture suite with expected pass/fail outcomes; returns suite_hash and per-case snapshot hashes.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1
+          },
+          "version": {
+            "type": "string",
+            "maxLength": 40,
+            "minLength": 1
+          },
+          "cases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 80,
+                  "minLength": 1
+                },
+                "files": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "maxLength": 200,
+                        "minLength": 1
+                      },
+                      "content": {
+                        "type": "string",
+                        "maxLength": 200000
+                      }
+                    },
+                    "required": [
+                      "path",
+                      "content"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 100
+                },
+                "expected_pass": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "files",
+                "expected_pass"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 30
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "cases"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "version": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "cases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 80,
+                  "minLength": 1
+                },
+                "files": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "maxLength": 200,
+                        "minLength": 1
+                      },
+                      "content": {
+                        "type": "string",
+                        "maxLength": 200000
+                      }
+                    },
+                    "required": [
+                      "path",
+                      "content"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 100
+                },
+                "expected_pass": {
+                  "type": "boolean"
+                },
+                "snapshot_hash": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "minLength": 64
+                }
+              },
+              "required": [
+                "id",
+                "files",
+                "expected_pass",
+                "snapshot_hash"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 30
+          },
+          "suite_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "cases",
+          "suite_hash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "get_suite": {
+      "description": "Get fixtures for the agent to run through Preflight Checker. The evaluator does not invoke other apps itself.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "suite_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64
+          }
+        },
+        "required": [
+          "suite_hash"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "version": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "cases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "maxLength": 80,
+                  "minLength": 1
+                },
+                "files": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "maxLength": 200,
+                        "minLength": 1
+                      },
+                      "content": {
+                        "type": "string",
+                        "maxLength": 200000
+                      }
+                    },
+                    "required": [
+                      "path",
+                      "content"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 100
+                },
+                "expected_pass": {
+                  "type": "boolean"
+                },
+                "snapshot_hash": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "minLength": 64
+                }
+              },
+              "required": [
+                "id",
+                "files",
+                "expected_pass",
+                "snapshot_hash"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 30
+          },
+          "suite_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "cases",
+          "suite_hash"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "evaluate": {
+      "description": "Score exactly one agent-supplied report per suite case. Reject missing/duplicate cases, changed input hashes or mixed policies. Reports are supplied evidence, not independently authenticated executions.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "suite_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64
+          },
+          "observations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "case_id": {
+                  "type": "string",
+                  "maxLength": 80,
+                  "minLength": 1
+                },
+                "report": {
+                  "type": "object",
+                  "properties": {
+                    "run_id": {
+                      "type": "string",
+                      "maxLength": 100,
+                      "minLength": 1
+                    },
+                    "policy_hash": {
+                      "type": "string",
+                      "maxLength": 64,
+                      "minLength": 64
+                    },
+                    "policy_name": {
+                      "type": "string",
+                      "maxLength": 80
+                    },
+                    "policy_version": {
+                      "type": "string",
+                      "maxLength": 40
+                    },
+                    "snapshot_hash": {
+                      "type": "string",
+                      "maxLength": 64,
+                      "minLength": 64
+                    },
+                    "passed": {
+                      "type": "boolean"
+                    },
+                    "checks": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "maxLength": 80
+                          },
+                          "path": {
+                            "type": "string",
+                            "maxLength": 200
+                          },
+                          "passed": {
+                            "type": "boolean"
+                          },
+                          "message": {
+                            "type": "string",
+                            "maxLength": 200
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "path",
+                          "passed",
+                          "message"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "maxItems": 100
+                    },
+                    "failed_checks": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "maxLength": 80
+                      },
+                      "maxItems": 100
+                    },
+                    "duration_ms": {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "run_id",
+                    "policy_hash",
+                    "snapshot_hash",
+                    "passed",
+                    "duration_ms"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "case_id",
+                "report"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 30
+          }
+        },
+        "required": [
+          "suite_hash",
+          "observations"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "evaluation_id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "suite_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64
+          },
+          "policy_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64
+          },
+          "correct": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "accuracy": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "total_check_ms": {
+            "type": "number",
+            "minimum": 0
+          },
+          "cases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "case_id": {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                "correct": {
+                  "type": "boolean"
+                },
+                "expected_pass": {
+                  "type": "boolean"
+                },
+                "actual_pass": {
+                  "type": "boolean"
+                },
+                "source_run_id": {
+                  "type": "string",
+                  "maxLength": 100,
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "case_id",
+                "correct",
+                "expected_pass",
+                "actual_pass",
+                "source_run_id"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 30
+          }
+        },
+        "required": [
+          "evaluation_id",
+          "suite_hash",
+          "policy_hash",
+          "correct",
+          "total",
+          "accuracy",
+          "total_check_ms",
+          "cases"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "compare": {
+      "description": "Compare baseline and candidate evaluations of the exact same suite; report improved/regressed cases and descriptive check-time delta.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "baseline_id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "candidate_id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          }
+        },
+        "required": [
+          "baseline_id",
+          "candidate_id"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "suite_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64
+          },
+          "baseline_id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "candidate_id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "baseline_correct": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "candidate_correct": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "improved_cases": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 80
+            },
+            "maxItems": 30
+          },
+          "regressed_cases": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 80
+            },
+            "maxItems": 30
+          },
+          "improved_without_regressions": {
+            "type": "boolean"
+          },
+          "check_time_delta_ms": {
+            "type": "number"
+          },
+          "timing_note": {
+            "type": "string",
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "suite_hash",
+          "baseline_id",
+          "candidate_id",
+          "baseline_correct",
+          "candidate_correct",
+          "total",
+          "improved_cases",
+          "regressed_cases",
+          "improved_without_regressions",
+          "check_time_delta_ms",
+          "timing_note"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "get_evaluation": {
+      "description": "Read persisted scoring results and source run IDs.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "evaluation_id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          }
+        },
+        "required": [
+          "evaluation_id"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "evaluation_id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "suite_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64
+          },
+          "policy_hash": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 64
+          },
+          "correct": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "accuracy": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "total_check_ms": {
+            "type": "number",
+            "minimum": 0
+          },
+          "cases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "case_id": {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                "correct": {
+                  "type": "boolean"
+                },
+                "expected_pass": {
+                  "type": "boolean"
+                },
+                "actual_pass": {
+                  "type": "boolean"
+                },
+                "source_run_id": {
+                  "type": "string",
+                  "maxLength": 100,
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "case_id",
+                "correct",
+                "expected_pass",
+                "actual_pass",
+                "source_run_id"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 30
+          }
+        },
+        "required": [
+          "evaluation_id",
+          "suite_hash",
+          "policy_hash",
+          "correct",
+          "total",
+          "accuracy",
+          "total_check_ms",
+          "cases"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "list_suites": {
+      "description": "List recent suite summaries; get_suite returns full fixtures.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 20
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                "version": {
+                  "type": "string",
+                  "maxLength": 40
+                },
+                "suite_hash": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "minLength": 64
+                }
+              },
+              "required": [
+                "name",
+                "version",
+                "suite_hash"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "list_evaluations": {
+      "description": "List recent evaluation summaries in this collection.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 20
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "evaluation_id": {
+                  "type": "string",
+                  "maxLength": 100,
+                  "minLength": 1
+                },
+                "suite_hash": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "minLength": 64
+                },
+                "policy_hash": {
+                  "type": "string",
+                  "maxLength": 64,
+                  "minLength": 64
+                },
+                "correct": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "total": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "accuracy": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "total_check_ms": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "evaluation_id",
+                "suite_hash",
+                "policy_hash",
+                "correct",
+                "total",
+                "accuracy",
+                "total_check_ms"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 100
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "execution": {
+    "driver": "script",
+    "protocol": "rhyven.action/1",
+    "language": "python",
+    "entrypoint": "main.py",
+    "environment": "isolated",
+    "timeout_seconds": 30,
+    "python_version": "3.10"
+  },
+  "files": [
+    "main.py",
+    "common.py",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "guide": "Create a fixed suite with action_save_suite. The CALLING AGENT reads its cases, runs each through rhyven/preflight-checker action_run with one policy_hash, then submits full reports to action_evaluate as {case_id,report}. Evaluate baseline and candidate on the identical suite_hash and use action_compare. Missing/duplicate/unknown cases, input mismatches and mixed policy hashes are rejected. Never remove failing cases to claim improvement. Suite name/version and content hash are immutable; add cases as a new suite version, then rerun BOTH policies. Evaluation measures expected pass/fail accuracy, not general agent intelligence. Reports and timings are caller-supplied, not signed attestations; this app does not launch arbitrary commands, models, or MCP clients. Check time excludes process startup, transport/model time, and a single run is not a speed benchmark. Persisted SQLite state is collection/app-local. Python 3.10+, no pip or Docker. host.execute is unsandboxed; request human installation approval. Avoid secrets in stored fixture text.",
+  "tests": [
+    {
+      "operation": "execute",
+      "args": {
+        "action": "save_suite",
+        "args": {
+          "name": "smoke",
+          "version": "1",
+          "cases": [
+            {
+              "id": "good",
+              "files": [
+                {
+                  "path": "a.txt",
+                  "content": "hello"
+                }
+              ],
+              "expected_pass": true
+            }
+          ]
+        }
+      },
+      "expect": {
+        "version": "1"
+      }
+    },
+    {
+      "operation": "execute",
+      "args": {
+        "action": "get_suite",
+        "args": {
+          "suite_hash": {
+            "$result": "0.suite_hash"
+          }
+        }
+      },
+      "expect": {
+        "name": "smoke"
+      }
+    },
+    {
+      "operation": "execute",
+      "args": {
+        "action": "list_evaluations",
+        "args": {}
+      },
+      "expect": {
+        "items": []
+      }
+    },
+    {
+      "operation": "execute",
+      "args": {
+        "action": "evaluate",
+        "args": {
+          "suite_hash": {
+            "$result": "0.suite_hash"
+          },
+          "observations": [
+            {
+              "case_id": "good",
+              "report": {
+                "run_id": "smoke-False",
+                "policy_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "snapshot_hash": "23a2f6824cb3d542f149ea4999ad00026b7fcf980a22443a1089f7e952db2942",
+                "passed": false,
+                "duration_ms": 0.1
+              }
+            }
+          ]
+        }
+      },
+      "expect": {
+        "correct": 0,
+        "total": 1
+      }
+    },
+    {
+      "operation": "execute",
+      "args": {
+        "action": "evaluate",
+        "args": {
+          "suite_hash": {
+            "$result": "0.suite_hash"
+          },
+          "observations": [
+            {
+              "case_id": "good",
+              "report": {
+                "run_id": "smoke-True",
+                "policy_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                "snapshot_hash": "23a2f6824cb3d542f149ea4999ad00026b7fcf980a22443a1089f7e952db2942",
+                "passed": true,
+                "duration_ms": 0.1
+              }
+            }
+          ]
+        }
+      },
+      "expect": {
+        "correct": 1,
+        "total": 1
+      }
+    },
+    {
+      "operation": "execute",
+      "args": {
+        "action": "compare",
+        "args": {
+          "baseline_id": {
+            "$result": "3.evaluation_id"
+          },
+          "candidate_id": {
+            "$result": "4.evaluation_id"
+          }
+        }
+      },
+      "expect": {
+        "improved_without_regressions": true,
+        "regressed_cases": []
+      }
+    }
+  ]
+}
