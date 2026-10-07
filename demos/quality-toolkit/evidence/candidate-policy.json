@@ -1,0 +1,22 @@
+{
+  "checks": [
+    {
+      "id": "readme",
+      "kind": "exists",
+      "path": "README.md"
+    },
+    {
+      "id": "config",
+      "kind": "exists",
+      "path": "config.json"
+    },
+    {
+      "id": "json",
+      "kind": "json_valid",
+      "path": "config.json"
+    }
+  ],
+  "name": "release",
+  "policy_hash": "118fda524b6b529c2b4370b83a22abb2bc79586af3caf1eeb256ab9715bf02b6",
+  "version": "2"
+}

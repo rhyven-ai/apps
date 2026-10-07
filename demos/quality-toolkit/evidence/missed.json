@@ -1,0 +1,24 @@
+{
+  "checks": [
+    {
+      "id": "readme",
+      "message": "File exists",
+      "passed": true,
+      "path": "README.md"
+    },
+    {
+      "id": "config",
+      "message": "File exists",
+      "passed": true,
+      "path": "config.json"
+    }
+  ],
+  "duration_ms": 0.054514,
+  "failed_checks": [],
+  "passed": true,
+  "policy_hash": "b6e0692652a785e1bb8f725465b590a500a9be95953e85f7f39ee5a7f31b5ff5",
+  "policy_name": "release",
+  "policy_version": "1",
+  "run_id": "4440a4ad-e5f7-44fb-800d-219cb261d128",
+  "snapshot_hash": "3c47dac3b6c8734cac717bead82ac1f2fb5d62722c91e8021e443fe612a4047e"
+}

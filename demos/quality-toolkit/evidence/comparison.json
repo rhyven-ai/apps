@@ -1,0 +1,15 @@
+{
+  "baseline_correct": 2,
+  "baseline_id": "60e6769d-3d26-488e-9dc4-219254fc0a1e",
+  "candidate_correct": 3,
+  "candidate_id": "5b6b2248-99bf-4d34-bdef-a11684ea42d8",
+  "check_time_delta_ms": 0.03695000000000001,
+  "improved_cases": [
+    "broken-json"
+  ],
+  "improved_without_regressions": true,
+  "regressed_cases": [],
+  "suite_hash": "ad6e4cbaa9f61c975a6777535383f846d25999d24291413195944f206048165a",
+  "timing_note": "Reported check time only; excludes process, model and transport time. A single run is not a speed benchmark.",
+  "total": 3
+}

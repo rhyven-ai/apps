@@ -1,0 +1,16 @@
+{
+  "runtime": "0.5.5",
+  "collection": "quality-demo",
+  "apps": [
+    "rhyven/preflight-checker",
+    "rhyven/failure-to-regression",
+    "rhyven/workflow-evaluator"
+  ],
+  "baseline_correct": 2,
+  "candidate_correct": 3,
+  "cases": 3,
+  "regressions": 0,
+  "second_mcp_session_verified": true,
+  "kind": "Prepared sample; real MCP calls; versioned policy improvement, not executable code modification",
+  "suite_hash": "ad6e4cbaa9f61c975a6777535383f846d25999d24291413195944f206048165a"
+}

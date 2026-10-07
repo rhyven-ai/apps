@@ -1,0 +1,45 @@
+name: Quality toolkit
+on:
+  pull_request:
+    paths: ['apps/preflight-checker/**', 'apps/failure-to-regression/**', 'apps/workflow-evaluator/**', 'tests/**', '.github/workflows/quality-toolkit.yml']
+  push:
+    branches: [main]
+    paths: ['apps/preflight-checker/**', 'apps/failure-to-regression/**', 'apps/workflow-evaluator/**', 'tests/**', '.github/workflows/quality-toolkit.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: x86_64
+            sha256: 71e5290d48b84e3bde3931e1e18a3a24f260db73d839ac20937769a8b80052ea
+          - runner: ubuntu-24.04-arm
+            arch: aarch64
+            sha256: 9b26af48e4e06078cab23e08dd072ed45095dedd59d8a83a2577b6a288c3c92c
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Download pinned runtime
+        env:
+          ARCH: ${{ matrix.arch }}
+          EXPECTED_HASH: ${{ matrix.sha256 }}
+        run: |
+          curl --fail --silent --show-error --location "https://github.com/rhyven-ai/rhyven/releases/download/v0.5.5/rhyven-linux-$ARCH" --output "$RUNNER_TEMP/rhyven"
+          printf '%s  %s\n' "$EXPECTED_HASH" "$RUNNER_TEMP/rhyven" | sha256sum --check
+          chmod +x "$RUNNER_TEMP/rhyven"
+      - name: Behavior and isolation tests
+        run: python3 -m unittest discover -s tests -v
+      - name: Test source and packaged contracts
+        run: |
+          for app in preflight-checker failure-to-regression workflow-evaluator; do
+            "$RUNNER_TEMP/rhyven" --home "$RUNNER_TEMP/state" app validate "apps/$app"
+            "$RUNNER_TEMP/rhyven" --home "$RUNNER_TEMP/state" app test "apps/$app" --allow-host
+            "$RUNNER_TEMP/rhyven" --home "$RUNNER_TEMP/state" app package "apps/$app" --out "$RUNNER_TEMP/$app.rhyven.json"
+            "$RUNNER_TEMP/rhyven" --home "$RUNNER_TEMP/state" app test "$RUNNER_TEMP/$app.rhyven.json" --allow-host
+          done

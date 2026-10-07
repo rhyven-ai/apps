@@ -1,0 +1,6 @@
+{
+  "code": "revision_conflict",
+  "rhyven_protocol": 1,
+  "kind": "INVALID_ARGUMENT",
+  "message": "Read current record then retry with its revision"
+}

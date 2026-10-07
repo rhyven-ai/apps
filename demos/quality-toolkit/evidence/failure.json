@@ -1,0 +1,21 @@
+{
+  "app": "rhyven/failure-to-regression",
+  "created_at": 1791415427,
+  "data": {
+    "evaluation_id": "",
+    "fix_summary": "",
+    "project": "sample-release",
+    "reproduction": "Supply config.json containing {broken and a README.md",
+    "source_app": "rhyven/preflight-checker",
+    "source_record_id": "4440a4ad-e5f7-44fb-800d-219cb261d128",
+    "status": "open",
+    "suite_hash": "",
+    "symptom": "The release checker accepts malformed config.json",
+    "title": "Broken JSON accepted"
+  },
+  "id": "55f9c25fcf6e4165974e2adea292d0ea",
+  "object": "failure",
+  "revision": 1,
+  "updated_at": 1791415427,
+  "updated_by": "quality-builder"
+}

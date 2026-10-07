@@ -1,0 +1,32 @@
+{
+  "accuracy": 0.6666666666666666,
+  "cases": [
+    {
+      "actual_pass": true,
+      "case_id": "healthy",
+      "correct": true,
+      "expected_pass": true,
+      "source_run_id": "6ee02496-92e2-4811-bbf8-300127aadf1a"
+    },
+    {
+      "actual_pass": false,
+      "case_id": "missing-readme",
+      "correct": true,
+      "expected_pass": false,
+      "source_run_id": "a7cfe2dd-d549-4d9d-8f18-03af7ef13ceb"
+    },
+    {
+      "actual_pass": true,
+      "case_id": "broken-json",
+      "correct": false,
+      "expected_pass": false,
+      "source_run_id": "767ffac8-3b3e-4ba2-b607-28f3f4ec41dc"
+    }
+  ],
+  "correct": 2,
+  "evaluation_id": "60e6769d-3d26-488e-9dc4-219254fc0a1e",
+  "policy_hash": "b6e0692652a785e1bb8f725465b590a500a9be95953e85f7f39ee5a7f31b5ff5",
+  "suite_hash": "ad6e4cbaa9f61c975a6777535383f846d25999d24291413195944f206048165a",
+  "total": 3,
+  "total_check_ms": 0.154002
+}

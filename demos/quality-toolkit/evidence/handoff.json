@@ -1,0 +1,109 @@
+{
+  "evaluation": {
+    "accuracy": 1.0,
+    "cases": [
+      {
+        "actual_pass": true,
+        "case_id": "healthy",
+        "correct": true,
+        "expected_pass": true,
+        "source_run_id": "8135c81d-0bd4-4768-b2d3-b5da15a09709"
+      },
+      {
+        "actual_pass": false,
+        "case_id": "missing-readme",
+        "correct": true,
+        "expected_pass": false,
+        "source_run_id": "8940e99f-f488-4e64-a579-fbbaa5e4edc9"
+      },
+      {
+        "actual_pass": false,
+        "case_id": "broken-json",
+        "correct": true,
+        "expected_pass": false,
+        "source_run_id": "16eb36fa-6c9b-4ab4-87d1-e3cb554f7072"
+      }
+    ],
+    "correct": 3,
+    "evaluation_id": "5b6b2248-99bf-4d34-bdef-a11684ea42d8",
+    "policy_hash": "118fda524b6b529c2b4370b83a22abb2bc79586af3caf1eeb256ab9715bf02b6",
+    "suite_hash": "ad6e4cbaa9f61c975a6777535383f846d25999d24291413195944f206048165a",
+    "total": 3,
+    "total_check_ms": 0.190952
+  },
+  "policy": {
+    "checks": [
+      {
+        "id": "readme",
+        "kind": "exists",
+        "path": "README.md"
+      },
+      {
+        "id": "config",
+        "kind": "exists",
+        "path": "config.json"
+      },
+      {
+        "id": "json",
+        "kind": "json_valid",
+        "path": "config.json"
+      }
+    ],
+    "name": "release",
+    "policy_hash": "118fda524b6b529c2b4370b83a22abb2bc79586af3caf1eeb256ab9715bf02b6",
+    "version": "2"
+  },
+  "failure": {
+    "app": "rhyven/failure-to-regression",
+    "created_at": 1791415427,
+    "data": {
+      "evaluation_id": "5b6b2248-99bf-4d34-bdef-a11684ea42d8",
+      "fix_summary": "Policy version 2 validates JSON as well as requiring files.",
+      "project": "sample-release",
+      "reproduction": "Supply config.json containing {broken and a README.md",
+      "source_app": "rhyven/preflight-checker",
+      "source_record_id": "4440a4ad-e5f7-44fb-800d-219cb261d128",
+      "status": "fixed",
+      "suite_hash": "ad6e4cbaa9f61c975a6777535383f846d25999d24291413195944f206048165a",
+      "symptom": "The release checker accepts malformed config.json",
+      "title": "Broken JSON accepted"
+    },
+    "id": "55f9c25fcf6e4165974e2adea292d0ea",
+    "object": "failure",
+    "revision": 2,
+    "updated_at": 1791415428,
+    "updated_by": "quality-builder"
+  },
+  "repeated_check": {
+    "checks": [
+      {
+        "id": "readme",
+        "message": "File exists",
+        "passed": true,
+        "path": "README.md"
+      },
+      {
+        "id": "config",
+        "message": "File exists",
+        "passed": true,
+        "path": "config.json"
+      },
+      {
+        "id": "json",
+        "message": "File syntax is invalid",
+        "passed": false,
+        "path": "config.json"
+      }
+    ],
+    "duration_ms": 0.164562,
+    "failed_checks": [
+      "json"
+    ],
+    "passed": false,
+    "policy_hash": "118fda524b6b529c2b4370b83a22abb2bc79586af3caf1eeb256ab9715bf02b6",
+    "policy_name": "release",
+    "policy_version": "2",
+    "run_id": "55309aa6-06f8-4d2e-8c13-91d2924c42c1",
+    "snapshot_hash": "3c47dac3b6c8734cac717bead82ac1f2fb5d62722c91e8021e443fe612a4047e"
+  }
+}
