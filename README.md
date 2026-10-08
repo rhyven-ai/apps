@@ -114,3 +114,11 @@ The [quality toolkit demo](demos/quality-toolkit/README.md) connects three apps:
 record a missed failure, save a regression fixture, improve a check policy and
 compare both versions on the same cases. Another agent can reuse the saved policy
 and evidence. All three run on Rhyven 0.5.5 without Docker or runtime changes.
+
+## Reusable libraries
+
+Apps provide complete capabilities. Pallets provide portable source functions
+that can be reused when building apps. See [Text Kit](https://github.com/rhyven-ai/text-kit)
+for a tested Python example and [the pallet guide](https://github.com/rhyven-ai/rhyven/blob/main/docs/portable-pallets.md)
+for workspace/global libraries and publishing. The included composition skill
+guides agents through reuse, testing and user-approved sharing.

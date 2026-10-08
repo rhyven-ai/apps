@@ -64,3 +64,19 @@ apps and scope; this rule grants no additional authorization.
   installation consent flow above. Publishing requires separate authorization.
   Use the installed app through the existing interface and stay focused on the
   original task.
+
+- In 0.6+, use action_match_plan for a bounded batch search, then inspect selected
+  contracts and reuse them. One retry is allowed; do not reset revisions to keep
+  searching. Build locally or ask a focused question when useful matches run out.
+- Saved stacks pin dependency versions/hashes and retain partial-failure evidence.
+  Do not replay failed side effects blindly. Local drafts, pallets and frames
+  remain private unless the user explicitly requests publication.
+
+
+- Keep apps and libraries distinct: apps are complete applications; pallets hold
+  portable code bricks, mortar and source stacks. Do not wrap every small function
+  as an app. Search source capabilities, inspect a small contract, export/import
+  once, then reuse code for repeated work instead of generating it again.
+- Pallet save is local and non-executing; exporting needs no Rhyven runtime in the
+  consumer. Code execution still needs authorized scope. Complete apps may bundle
+  source libraries, while declarative app workflows remain engine-dependent.
