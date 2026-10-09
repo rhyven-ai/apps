@@ -255,6 +255,9 @@ matching to find code for reuse. action_pallet_list and action_pallet_describe
 provide compact local library discovery; no implementation source is returned.
 Reuse if_hash, export/import code once, and call it for repeated operations rather
 than regenerating source. Read code when review or debugging needs it.
+On 0.7.0+, descriptions include local `tests` evidence at the exact package hash.
+Check status and per-export coverage; saving alone does not test code. Passing
+examples are not certification. Changed source needs a new explicit test run.
 
 For authoring read the bundled build-rhyven-composition skill. The CLI's pallet
 save retains a library without execution/installation; pallet export produces
@@ -263,7 +266,8 @@ unsandboxed source only within authorized code-execution scope. App installation
 consent remains separate. Complete apps can bundle source libraries.
 
 Engine-managed app workflows remain available through app compose, with pinned
-app dependencies and failure records. They are not portable source stacks.
+app dependencies and failure records. On 0.7.0+, use operation:"workflow";
+"stack" remains a deprecated alias. They are not portable source stacks.
 Inspect partial outcomes before retrying uncertain side effects.
 
 Local creation and reuse do not authorize public sharing. Publish only when

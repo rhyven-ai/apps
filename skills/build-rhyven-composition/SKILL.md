@@ -1,6 +1,6 @@
 ---
 name: build-rhyven-composition
-description: Create, discover, test and reuse portable code bricks, mortar, stacks and pallets, or build a complete Rhyven app from them. Use for repeatable code and app composition on Rhyven 0.6.0 or later.
+description: Create, discover, test and reuse portable code bricks, mortar, stacks and pallets, or build a complete Rhyven app from them. Use for repeatable code and app composition on Rhyven 0.7.0 or later.
 ---
 
 # Reusable code and complete apps
@@ -94,3 +94,9 @@ Resolve conflicting contents explicitly with `workspace::` or `global::` selecto
 Marketplace libraries use `action_pallet_search`, `action_prepare_pallet` and
 `action_apply`; obtain user approval before download. Saving or downloading source
 grants no execution permission. Publish only when the user explicitly requests it.
+
+Use `operation:"workflow"` for engine-managed app workflows. `stack` remains a
+legacy alias; portable stacks are ordinary composed source functions.
+`pallet test` records local evidence at the exact package hash; saving alone does
+not run tests. Inspect `tests.status` and per-export coverage before reuse. Passing
+declared examples is a ranking signal, not certification or a security guarantee.
