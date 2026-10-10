@@ -1,0 +1,1392 @@
+{
+  "format": 2,
+  "name": "rhyven/design-review",
+  "version": "0.1.0",
+  "publisher": "rhyven",
+  "description": "Collect short proposals from your agent\u2019s reviewers and record its decision.",
+  "hosting": {
+    "mode": "local"
+  },
+  "execution": {
+    "driver": "script",
+    "protocol": "rhyven.action/1",
+    "language": "python",
+    "entrypoint": "main.py",
+    "environment": "isolated",
+    "timeout_seconds": 30,
+    "python_version": "3.10"
+  },
+  "permissions": [
+    "state.read",
+    "state.write",
+    "host.execute"
+  ],
+  "objects": {},
+  "actions": {
+    "start": {
+      "description": "Create up to three review tasks for your connected harness.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "context": {
+            "type": "string",
+            "maxLength": 16000
+          },
+          "constraints": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "perspectives": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "maxItems": 3
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "minimum": 30,
+            "maximum": 3600
+          },
+          "max_output_tokens": {
+            "type": "integer",
+            "minimum": 50,
+            "maximum": 2000
+          }
+        },
+        "required": [
+          "question"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "review": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "question": {
+                "type": "string",
+                "maxLength": 4000
+              },
+              "context": {
+                "type": "string",
+                "maxLength": 16000
+              },
+              "constraints": {
+                "type": "string",
+                "maxLength": 4000
+              },
+              "status": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "created_at": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9999999999
+              },
+              "deadline": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9999999999
+              },
+              "max_output_tokens": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2000
+              },
+              "tasks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "perspective": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "status": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "proposal": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "approach": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "assumptions": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "tradeoffs": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "checks": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "model": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "submitted_by": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "input_tokens": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 10000000
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "output_tokens": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 100000
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "latency_ms": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 86400000
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "approach",
+                            "assumptions",
+                            "tradeoffs",
+                            "checks",
+                            "model",
+                            "submitted_by",
+                            "input_tokens",
+                            "output_tokens",
+                            "latency_ms"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "perspective",
+                    "status",
+                    "proposal"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 3
+              },
+              "decision": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "selected_tasks": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "maxItems": 3
+                      },
+                      "rationale": {
+                        "type": "string",
+                        "maxLength": 4000
+                      },
+                      "decided_by": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "decided_at": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9999999999
+                      }
+                    },
+                    "required": [
+                      "selected_tasks",
+                      "rationale",
+                      "decided_by",
+                      "decided_at"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "usage_reported": {
+                "type": "boolean"
+              },
+              "reported_input_tokens": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 30000000
+              },
+              "reported_output_tokens": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 300000
+              }
+            },
+            "required": [
+              "id",
+              "question",
+              "context",
+              "constraints",
+              "status",
+              "created_at",
+              "deadline",
+              "max_output_tokens",
+              "tasks",
+              "decision",
+              "usage_reported",
+              "reported_input_tokens",
+              "reported_output_tokens"
+            ],
+            "additionalProperties": false
+          },
+          "delegation": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "usage_is_self_reported": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "review",
+          "delegation",
+          "usage_is_self_reported"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "get": {
+      "description": "Read tasks, proposals, usage and the final decision.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "review_id": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "review_id"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "review": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "question": {
+                "type": "string",
+                "maxLength": 4000
+              },
+              "context": {
+                "type": "string",
+                "maxLength": 16000
+              },
+              "constraints": {
+                "type": "string",
+                "maxLength": 4000
+              },
+              "status": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "created_at": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9999999999
+              },
+              "deadline": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9999999999
+              },
+              "max_output_tokens": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2000
+              },
+              "tasks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "perspective": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "status": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "proposal": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "approach": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "assumptions": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "tradeoffs": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "checks": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "model": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "submitted_by": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "input_tokens": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 10000000
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "output_tokens": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 100000
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "latency_ms": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 86400000
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "approach",
+                            "assumptions",
+                            "tradeoffs",
+                            "checks",
+                            "model",
+                            "submitted_by",
+                            "input_tokens",
+                            "output_tokens",
+                            "latency_ms"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "perspective",
+                    "status",
+                    "proposal"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 3
+              },
+              "decision": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "selected_tasks": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "maxItems": 3
+                      },
+                      "rationale": {
+                        "type": "string",
+                        "maxLength": 4000
+                      },
+                      "decided_by": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "decided_at": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9999999999
+                      }
+                    },
+                    "required": [
+                      "selected_tasks",
+                      "rationale",
+                      "decided_by",
+                      "decided_at"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "usage_reported": {
+                "type": "boolean"
+              },
+              "reported_input_tokens": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 30000000
+              },
+              "reported_output_tokens": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 300000
+              }
+            },
+            "required": [
+              "id",
+              "question",
+              "context",
+              "constraints",
+              "status",
+              "created_at",
+              "deadline",
+              "max_output_tokens",
+              "tasks",
+              "decision",
+              "usage_reported",
+              "reported_input_tokens",
+              "reported_output_tokens"
+            ],
+            "additionalProperties": false
+          },
+          "delegation": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "usage_is_self_reported": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "review",
+          "delegation",
+          "usage_is_self_reported"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "cancel": {
+      "description": "Close a review without a decision.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "review_id": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "review_id"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "review": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "question": {
+                "type": "string",
+                "maxLength": 4000
+              },
+              "context": {
+                "type": "string",
+                "maxLength": 16000
+              },
+              "constraints": {
+                "type": "string",
+                "maxLength": 4000
+              },
+              "status": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "created_at": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9999999999
+              },
+              "deadline": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9999999999
+              },
+              "max_output_tokens": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2000
+              },
+              "tasks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "perspective": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "status": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "proposal": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "approach": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "assumptions": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "tradeoffs": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "checks": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "model": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "submitted_by": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "input_tokens": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 10000000
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "output_tokens": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 100000
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "latency_ms": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 86400000
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "approach",
+                            "assumptions",
+                            "tradeoffs",
+                            "checks",
+                            "model",
+                            "submitted_by",
+                            "input_tokens",
+                            "output_tokens",
+                            "latency_ms"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "perspective",
+                    "status",
+                    "proposal"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 3
+              },
+              "decision": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "selected_tasks": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "maxItems": 3
+                      },
+                      "rationale": {
+                        "type": "string",
+                        "maxLength": 4000
+                      },
+                      "decided_by": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "decided_at": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9999999999
+                      }
+                    },
+                    "required": [
+                      "selected_tasks",
+                      "rationale",
+                      "decided_by",
+                      "decided_at"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "usage_reported": {
+                "type": "boolean"
+              },
+              "reported_input_tokens": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 30000000
+              },
+              "reported_output_tokens": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 300000
+              }
+            },
+            "required": [
+              "id",
+              "question",
+              "context",
+              "constraints",
+              "status",
+              "created_at",
+              "deadline",
+              "max_output_tokens",
+              "tasks",
+              "decision",
+              "usage_reported",
+              "reported_input_tokens",
+              "reported_output_tokens"
+            ],
+            "additionalProperties": false
+          },
+          "delegation": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "usage_is_self_reported": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "review",
+          "delegation",
+          "usage_is_self_reported"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "submit": {
+      "description": "Save a proposal produced by the calling harness.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "review_id": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "task_id": {
+            "type": "string",
+            "maxLength": 10
+          },
+          "approach": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "assumptions": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "tradeoffs": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "checks": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "model": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "input_tokens": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000000
+          },
+          "output_tokens": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100000
+          },
+          "latency_ms": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 86400000
+          }
+        },
+        "required": [
+          "review_id",
+          "task_id",
+          "approach",
+          "assumptions",
+          "tradeoffs",
+          "checks",
+          "model"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "review": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "question": {
+                "type": "string",
+                "maxLength": 4000
+              },
+              "context": {
+                "type": "string",
+                "maxLength": 16000
+              },
+              "constraints": {
+                "type": "string",
+                "maxLength": 4000
+              },
+              "status": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "created_at": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9999999999
+              },
+              "deadline": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9999999999
+              },
+              "max_output_tokens": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2000
+              },
+              "tasks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "perspective": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "status": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "proposal": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "approach": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "assumptions": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "tradeoffs": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "checks": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "model": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "submitted_by": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "input_tokens": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 10000000
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "output_tokens": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 100000
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "latency_ms": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 86400000
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "approach",
+                            "assumptions",
+                            "tradeoffs",
+                            "checks",
+                            "model",
+                            "submitted_by",
+                            "input_tokens",
+                            "output_tokens",
+                            "latency_ms"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "perspective",
+                    "status",
+                    "proposal"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 3
+              },
+              "decision": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "selected_tasks": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "maxItems": 3
+                      },
+                      "rationale": {
+                        "type": "string",
+                        "maxLength": 4000
+                      },
+                      "decided_by": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "decided_at": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9999999999
+                      }
+                    },
+                    "required": [
+                      "selected_tasks",
+                      "rationale",
+                      "decided_by",
+                      "decided_at"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "usage_reported": {
+                "type": "boolean"
+              },
+              "reported_input_tokens": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 30000000
+              },
+              "reported_output_tokens": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 300000
+              }
+            },
+            "required": [
+              "id",
+              "question",
+              "context",
+              "constraints",
+              "status",
+              "created_at",
+              "deadline",
+              "max_output_tokens",
+              "tasks",
+              "decision",
+              "usage_reported",
+              "reported_input_tokens",
+              "reported_output_tokens"
+            ],
+            "additionalProperties": false
+          },
+          "delegation": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "usage_is_self_reported": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "review",
+          "delegation",
+          "usage_is_self_reported"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "decide": {
+      "description": "Record the calling agent\u2019s decision; it may reject every proposal.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "review_id": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "selected_tasks": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 10
+            },
+            "maxItems": 3
+          },
+          "rationale": {
+            "type": "string",
+            "maxLength": 4000
+          }
+        },
+        "required": [
+          "review_id",
+          "rationale"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "review": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "question": {
+                "type": "string",
+                "maxLength": 4000
+              },
+              "context": {
+                "type": "string",
+                "maxLength": 16000
+              },
+              "constraints": {
+                "type": "string",
+                "maxLength": 4000
+              },
+              "status": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "created_at": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9999999999
+              },
+              "deadline": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9999999999
+              },
+              "max_output_tokens": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2000
+              },
+              "tasks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "perspective": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "status": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "proposal": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "approach": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "assumptions": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "tradeoffs": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "checks": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "model": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "submitted_by": {
+                              "type": "string",
+                              "maxLength": 2000
+                            },
+                            "input_tokens": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 10000000
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "output_tokens": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 100000
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "latency_ms": {
+                              "anyOf": [
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 86400000
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "approach",
+                            "assumptions",
+                            "tradeoffs",
+                            "checks",
+                            "model",
+                            "submitted_by",
+                            "input_tokens",
+                            "output_tokens",
+                            "latency_ms"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "perspective",
+                    "status",
+                    "proposal"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 3
+              },
+              "decision": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "selected_tasks": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "maxItems": 3
+                      },
+                      "rationale": {
+                        "type": "string",
+                        "maxLength": 4000
+                      },
+                      "decided_by": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "decided_at": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9999999999
+                      }
+                    },
+                    "required": [
+                      "selected_tasks",
+                      "rationale",
+                      "decided_by",
+                      "decided_at"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "usage_reported": {
+                "type": "boolean"
+              },
+              "reported_input_tokens": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 30000000
+              },
+              "reported_output_tokens": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 300000
+              }
+            },
+            "required": [
+              "id",
+              "question",
+              "context",
+              "constraints",
+              "status",
+              "created_at",
+              "deadline",
+              "max_output_tokens",
+              "tasks",
+              "decision",
+              "usage_reported",
+              "reported_input_tokens",
+              "reported_output_tokens"
+            ],
+            "additionalProperties": false
+          },
+          "delegation": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "usage_is_self_reported": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "review",
+          "delegation",
+          "usage_is_self_reported"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "guide": "Start a review only when different perspectives would help. The app does not call models or spawn agents. Use your existing harness to delegate each returned task once, with only the selected question/context/constraints and the requested token limit. If delegation is unavailable, use one review and identify it as the same agent; do not invent independent reviewers. No recursive delegation. Configure model, spending and permission limits in the harness before calls. Submit each proposal and actual usage when available, then decide (including rejection of all proposals). Missing usage is unknown; reported totals cover supplied usage only. The app cannot enforce provider billing or measure tokenizer output. Do not claim lower cost or improved quality without measured outcomes. Preserve dissent and use Change Verifier for executable checks. Actors identify participants within a trusted collection, not separate authentication domains. Reuse request_id only for an identical retry.",
+  "tests": [],
+  "files": [
+    "main.py"
+  ],
+  "display_name": "Design Review"
+}

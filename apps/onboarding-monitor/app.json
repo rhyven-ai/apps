@@ -1,0 +1,847 @@
+{
+  "format": 2,
+  "name": "rhyven/onboarding-monitor",
+  "version": "0.1.0",
+  "publisher": "rhyven",
+  "description": "Track customer documents, replies and deadlines for an agent to review.",
+  "hosting": {
+    "mode": "local"
+  },
+  "permissions": [
+    "state.read",
+    "state.write",
+    "container.execute",
+    "service.run"
+  ],
+  "execution": {
+    "driver": "container",
+    "mode": "service",
+    "protocol": "rhyven.service/1",
+    "image": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "start_policy": "on-demand",
+    "timeout_seconds": 10,
+    "startup_timeout_seconds": 15,
+    "shutdown_timeout_seconds": 5,
+    "restart_limit": 2,
+    "memory_mb": 128,
+    "cpus": 1
+  },
+  "objects": {},
+  "actions": {
+    "health": {
+      "description": "Check storage, pause state and runner configuration.",
+      "input": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "paused": {
+            "type": "boolean"
+          },
+          "webhook_configured": {
+            "type": "boolean"
+          },
+          "last_error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok",
+          "paused",
+          "webhook_configured",
+          "last_error"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "open": {
+      "description": "Start tracking requirements and a deadline.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "requirements": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 120
+            },
+            "maxItems": 30
+          },
+          "deadline": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9999999999
+          }
+        },
+        "required": [
+          "customer_id",
+          "requirements",
+          "deadline"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "requirements": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "status": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "source": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "note": {
+                      "type": "string",
+                      "maxLength": 2000
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "status",
+                    "source",
+                    "note"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 30
+              },
+              "deadline": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9999999999
+              },
+              "status": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "revision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9999999999
+              },
+              "questions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 2000
+                },
+                "maxItems": 20
+              },
+              "links": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "maxItems": 20
+              }
+            },
+            "required": [
+              "id",
+              "requirements",
+              "deadline",
+              "status",
+              "revision",
+              "questions",
+              "links"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "customer"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "get": {
+      "description": "Read requirements, source references, questions and handoff state.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "customer_id"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "requirements": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "status": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "source": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "note": {
+                      "type": "string",
+                      "maxLength": 2000
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "status",
+                    "source",
+                    "note"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 30
+              },
+              "deadline": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9999999999
+              },
+              "status": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "revision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9999999999
+              },
+              "questions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 2000
+                },
+                "maxItems": 20
+              },
+              "links": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "maxItems": 20
+              }
+            },
+            "required": [
+              "id",
+              "requirements",
+              "deadline",
+              "status",
+              "revision",
+              "questions",
+              "links"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "customer"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "ingest": {
+      "description": "Record a document or reply; arrival does not mean approval.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "event_id": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "document",
+              "reply"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "requirement": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 4000
+          }
+        },
+        "required": [
+          "customer_id",
+          "event_id",
+          "kind",
+          "source"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "requirements": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "status": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "source": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "note": {
+                      "type": "string",
+                      "maxLength": 2000
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "status",
+                    "source",
+                    "note"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 30
+              },
+              "deadline": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9999999999
+              },
+              "status": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "revision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9999999999
+              },
+              "questions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 2000
+                },
+                "maxItems": 20
+              },
+              "links": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "maxItems": 20
+              }
+            },
+            "required": [
+              "id",
+              "requirements",
+              "deadline",
+              "status",
+              "revision",
+              "questions",
+              "links"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "customer"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "review": {
+      "description": "Record an agent review and draft questions without sending them.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9999999999
+          },
+          "requirement": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "accepted": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "maxItems": 20
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 512
+            },
+            "maxItems": 20
+          }
+        },
+        "required": [
+          "customer_id",
+          "expected_revision",
+          "requirement",
+          "accepted",
+          "note"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "requirements": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "status": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "source": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "note": {
+                      "type": "string",
+                      "maxLength": 2000
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "status",
+                    "source",
+                    "note"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 30
+              },
+              "deadline": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9999999999
+              },
+              "status": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "revision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9999999999
+              },
+              "questions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 2000
+                },
+                "maxItems": 20
+              },
+              "links": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "maxItems": 20
+              }
+            },
+            "required": [
+              "id",
+              "requirements",
+              "deadline",
+              "status",
+              "revision",
+              "questions",
+              "links"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "customer"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "handoff": {
+      "description": "Complete onboarding after all requirements and questions are resolved.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9999999999
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 512
+            },
+            "maxItems": 20
+          }
+        },
+        "required": [
+          "customer_id",
+          "expected_revision"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "customer": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "requirements": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "status": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "source": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "note": {
+                      "type": "string",
+                      "maxLength": 2000
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "status",
+                    "source",
+                    "note"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 30
+              },
+              "deadline": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9999999999
+              },
+              "status": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "revision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9999999999
+              },
+              "questions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 2000
+                },
+                "maxItems": 20
+              },
+              "links": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 512
+                },
+                "maxItems": 20
+              }
+            },
+            "required": [
+              "id",
+              "requirements",
+              "deadline",
+              "status",
+              "revision",
+              "questions",
+              "links"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "customer"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "pause": {
+      "description": "Pause deadline checks, new inbox claims and runner notifications.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "paused": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "paused"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "paused": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "paused"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "claim": {
+      "description": "Lease pending events for the calling actor.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20
+          },
+          "lease_seconds": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "customer_id": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "kind": {
+                      "type": "string",
+                      "maxLength": 2000
+                    },
+                    "detail": {
+                      "type": "string",
+                      "maxLength": 12000
+                    },
+                    "created_at": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9999999999
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "customer_id",
+                    "kind",
+                    "detail",
+                    "created_at"
+                  ],
+                  "additionalProperties": false
+                },
+                "lease_token": {
+                  "type": "string",
+                  "maxLength": 2000
+                },
+                "lease_until": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9999999999
+                },
+                "notification_attempts": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9999999999
+                },
+                "notification_error": {
+                  "type": "string",
+                  "maxLength": 2000
+                }
+              },
+              "required": [
+                "event",
+                "lease_token",
+                "lease_until",
+                "notification_attempts",
+                "notification_error"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 20
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "acknowledge": {
+      "description": "Acknowledge work after it has been completed.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "maxLength": 256
+          },
+          "lease_token": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "event_id",
+          "lease_token"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "acknowledged": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "acknowledged"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "guide": "Open a customer with named requirements and a Unix-second deadline. Ingest only events from authorized sources, with a stable unique event_id and source reference; duplicate events are not reapplied. This service monitors deadlines while running. Connectors or agents submit documents/replies; it does not scrape email or watch arbitrary directories. Claim events, inspect the customer, use installed file actions to read approved files, then review each requirement with expected_revision. Questions are drafts only: send externally only through separately authorized tools. Link tasks and knowledge entries using links. Handoff requires accepted requirements and no unanswered questions. Claims expire; deduplicate work by event ID and acknowledge only after success. Actor labels route work within a trusted collection, not an authentication boundary. Pause stops new claims and notifications while preserving incoming events. Offline inbox is the default; optional HTTPS runner notifications require a reviewed network-enabled package and operator-supplied webhook/token secrets (see README). Notifications only wake a configured runner, never execute incoming instructions. MCP alone cannot wake an agent. Start the Rhyven daemon; opt into service autostart to monitor across reboots.",
+  "tests": [],
+  "display_name": "Customer Onboarding Monitor"
+}

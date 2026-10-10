@@ -1,0 +1,808 @@
+{
+  "format": 2,
+  "name": "rhyven/change-verifier",
+  "version": "0.1.0",
+  "publisher": "rhyven",
+  "description": "Run the same Python regression test before and after a change.",
+  "hosting": {
+    "mode": "local"
+  },
+  "permissions": [
+    "state.read",
+    "state.write",
+    "container.execute",
+    "service.run"
+  ],
+  "execution": {
+    "driver": "container",
+    "mode": "service",
+    "protocol": "rhyven.service/1",
+    "image": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "start_policy": "on-demand",
+    "timeout_seconds": 10,
+    "startup_timeout_seconds": 15,
+    "shutdown_timeout_seconds": 5,
+    "restart_limit": 2,
+    "memory_mb": 512,
+    "cpus": 1
+  },
+  "objects": {},
+  "actions": {
+    "prepare": {
+      "description": "Save two Python source snapshots and identical regression tests.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "baseline": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "content": {
+                  "type": "string",
+                  "maxLength": 65536
+                }
+              },
+              "required": [
+                "path",
+                "content"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 128
+          },
+          "candidate": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "content": {
+                  "type": "string",
+                  "maxLength": 65536
+                }
+              },
+              "required": [
+                "path",
+                "content"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 128
+          },
+          "regression": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "content": {
+                  "type": "string",
+                  "maxLength": 65536
+                }
+              },
+              "required": [
+                "path",
+                "content"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 128
+          },
+          "baseline_commit": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "candidate_commit": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 30
+          }
+        },
+        "required": [
+          "baseline",
+          "candidate",
+          "regression"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "input_sha256": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "status": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "report": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "hashes": {
+                    "type": "object",
+                    "properties": {
+                      "baseline": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "candidate": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "regression": {
+                        "type": "string",
+                        "maxLength": 2000
+                      }
+                    },
+                    "required": [
+                      "baseline",
+                      "candidate",
+                      "regression"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "environment": {
+                    "type": "object",
+                    "properties": {
+                      "python": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "pytest": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "platform": {
+                        "type": "string",
+                        "maxLength": 2000
+                      }
+                    },
+                    "required": [
+                      "python",
+                      "pytest",
+                      "platform"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "stages": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "exit_code": {
+                          "type": "integer"
+                        },
+                        "duration_ms": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9999999999
+                        },
+                        "tests": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9999999999
+                        },
+                        "failures": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9999999999
+                        },
+                        "errors": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9999999999
+                        },
+                        "log": {
+                          "type": "string",
+                          "maxLength": 8000
+                        },
+                        "name": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "skipped": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "exit_code",
+                        "duration_ms",
+                        "tests",
+                        "failures",
+                        "errors",
+                        "log",
+                        "name",
+                        "skipped"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 3
+                  },
+                  "outcome": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "limits": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "error": {
+                    "type": "string",
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "outcome"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "run_id",
+          "input_sha256",
+          "status",
+          "report"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "run": {
+      "description": "Start a comparison in disposable directories.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "run_id"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "input_sha256": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "status": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "report": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "hashes": {
+                    "type": "object",
+                    "properties": {
+                      "baseline": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "candidate": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "regression": {
+                        "type": "string",
+                        "maxLength": 2000
+                      }
+                    },
+                    "required": [
+                      "baseline",
+                      "candidate",
+                      "regression"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "environment": {
+                    "type": "object",
+                    "properties": {
+                      "python": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "pytest": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "platform": {
+                        "type": "string",
+                        "maxLength": 2000
+                      }
+                    },
+                    "required": [
+                      "python",
+                      "pytest",
+                      "platform"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "stages": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "exit_code": {
+                          "type": "integer"
+                        },
+                        "duration_ms": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9999999999
+                        },
+                        "tests": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9999999999
+                        },
+                        "failures": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9999999999
+                        },
+                        "errors": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9999999999
+                        },
+                        "log": {
+                          "type": "string",
+                          "maxLength": 8000
+                        },
+                        "name": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "skipped": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "exit_code",
+                        "duration_ms",
+                        "tests",
+                        "failures",
+                        "errors",
+                        "log",
+                        "name",
+                        "skipped"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 3
+                  },
+                  "outcome": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "limits": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "error": {
+                    "type": "string",
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "outcome"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "run_id",
+          "input_sha256",
+          "status",
+          "report"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "get": {
+      "description": "Read status and bounded test evidence.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "run_id"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "input_sha256": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "status": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "report": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "hashes": {
+                    "type": "object",
+                    "properties": {
+                      "baseline": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "candidate": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "regression": {
+                        "type": "string",
+                        "maxLength": 2000
+                      }
+                    },
+                    "required": [
+                      "baseline",
+                      "candidate",
+                      "regression"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "environment": {
+                    "type": "object",
+                    "properties": {
+                      "python": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "pytest": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "platform": {
+                        "type": "string",
+                        "maxLength": 2000
+                      }
+                    },
+                    "required": [
+                      "python",
+                      "pytest",
+                      "platform"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "stages": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "exit_code": {
+                          "type": "integer"
+                        },
+                        "duration_ms": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9999999999
+                        },
+                        "tests": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9999999999
+                        },
+                        "failures": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9999999999
+                        },
+                        "errors": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9999999999
+                        },
+                        "log": {
+                          "type": "string",
+                          "maxLength": 8000
+                        },
+                        "name": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "skipped": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "exit_code",
+                        "duration_ms",
+                        "tests",
+                        "failures",
+                        "errors",
+                        "log",
+                        "name",
+                        "skipped"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 3
+                  },
+                  "outcome": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "limits": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "error": {
+                    "type": "string",
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "outcome"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "run_id",
+          "input_sha256",
+          "status",
+          "report"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "cancel": {
+      "description": "Request cancellation of a pending or running comparison.",
+      "input": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "maxLength": 128
+          }
+        },
+        "required": [
+          "run_id"
+        ],
+        "additionalProperties": false
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "input_sha256": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "status": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "report": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "hashes": {
+                    "type": "object",
+                    "properties": {
+                      "baseline": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "candidate": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "regression": {
+                        "type": "string",
+                        "maxLength": 2000
+                      }
+                    },
+                    "required": [
+                      "baseline",
+                      "candidate",
+                      "regression"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "environment": {
+                    "type": "object",
+                    "properties": {
+                      "python": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "pytest": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "platform": {
+                        "type": "string",
+                        "maxLength": 2000
+                      }
+                    },
+                    "required": [
+                      "python",
+                      "pytest",
+                      "platform"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "stages": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "exit_code": {
+                          "type": "integer"
+                        },
+                        "duration_ms": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9999999999
+                        },
+                        "tests": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9999999999
+                        },
+                        "failures": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9999999999
+                        },
+                        "errors": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9999999999
+                        },
+                        "log": {
+                          "type": "string",
+                          "maxLength": 8000
+                        },
+                        "name": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "skipped": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "exit_code",
+                        "duration_ms",
+                        "tests",
+                        "failures",
+                        "errors",
+                        "log",
+                        "name",
+                        "skipped"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "maxItems": 3
+                  },
+                  "outcome": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "limits": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "error": {
+                    "type": "string",
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "outcome"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "run_id",
+          "input_sha256",
+          "status",
+          "report"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "guide": "Prepare with explicitly selected baseline and candidate source snapshots and separate test_*.py regression files; do not send secrets. Snapshots accept UTF-8 source files, not host paths, symlinks or submodules. The app runs pytest in the container without downloading dependencies. Include existing tests in the candidate. run starts a job; poll get with new request IDs and cancel if necessary. A supplied_case_verified report means the regression assertion failed on the baseline and passed on the candidate, and existing candidate tests passed. It does not prove the whole patch correct or secure. Test code is arbitrary code and could forge its reports; input hashes are provenance, not attestations. Dependencies are limited to the image; use a reviewed derived image for additional packages. Record report IDs in work, failure-to-regression and knowledge apps through the calling agent. Startup marks interrupted runs; they can be retried. Start the Rhyven service daemon before use.",
+  "tests": [],
+  "display_name": "Change Verifier"
+}

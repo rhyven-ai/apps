@@ -12,10 +12,13 @@ engine is also open source under Apache-2.0, in the separate
 | Error Management | [manifest](catalog/error-management.json) | Declarative |
 | CI Management | [manifest](catalog/ci-management.json) | Declarative |
 | Inventory | [manifest](catalog/inventory.json) | Declarative |
-| Preflight Checker | [checks and usage](apps/preflight-checker/README.md) | Native Python script |
-| Failure-to-Regression | [fixtures and fix tracking](apps/failure-to-regression/README.md) | Declarative |
-| Workflow Evaluator | [comparison and evidence](apps/workflow-evaluator/README.md) | Native Python script |
 | User Questions | [manifest and usage](apps/user-questions/README.md) | Declarative |
+| Design Review | [source and usage](apps/design-review/README.md) | Native Python script |
+| Change Verifier | [source and setup](apps/change-verifier/README.md) | Persistent container |
+| Customer Onboarding Monitor | [source and setup](apps/onboarding-monitor/README.md) | Persistent container |
+| Preflight Checker | [source and usage](apps/preflight-checker/README.md) | Native Python script |
+| Failure-to-Regression | [source and usage](apps/failure-to-regression/README.md) | Declarative |
+| Workflow Evaluator | [source and usage](apps/workflow-evaluator/README.md) | Native Python script |
 | Starter Runner | [source and setup](apps/starter-runner/README.md) | Persistent container |
 | File RAG | [standalone repository](https://github.com/rhyven-ai/file-rag) | Native Python script |
 | Razorback | [standalone repository](https://github.com/rhyven-ai/razorback) | Native Python connection app |
@@ -29,7 +32,7 @@ and immutable image digests; publishing source does not release a new image.
 ## Use or modify an app
 
 Install a compatible Rhyven binary separately. These apps use manifest format 2
-and the three-tool interface in Rhyven 0.5.5. Linux is the tested container platform; check the runtime's platform
+and the three-tool interface. Use Rhyven 0.8.0 for the new review and monitoring apps. Linux is the tested container platform; check the runtime's platform
 requirements and license terms. No Rust source build is needed to author an app.
 
 From this repository's root:
@@ -84,13 +87,12 @@ fixture, not a hosted service or an advertised v1 backend.
 ## Tests
 
 ```sh
-python3 -m unittest discover -s tests -v
 python3 -m unittest discover -s apps/starter-runner/tests -v
 python3 -m unittest discover -s apps/messaging/tests -v
 python3 -m unittest discover -s apps/repo-documentation-tool/tests -v
 ```
 
-These unit tests need only Python's standard library. Docker integration tests
+The tests listed above need only Python's standard library. Change Verifier's tests also require pytest 9.0.3. Docker integration tests
 need the runtime binary and a built image; see each app's README. The documentation
 app's external toolchains are downloaded only during image builds.
 
@@ -108,17 +110,13 @@ connects their own model API to tasks, knowledge and user questions. It requires
 Docker. [User Questions](apps/user-questions/README.md) is a separate declarative
 app, also useful to existing harnesses. Neither is required for ordinary app use.
 
-## Improve a reusable check
+## Review and onboarding
 
-The [quality toolkit demo](demos/quality-toolkit/README.md) connects three apps:
-record a missed failure, save a regression fixture, improve a check policy and
-compare both versions on the same cases. Another agent can reuse the saved policy
-and evidence. All three run on Rhyven 0.5.5 without Docker or runtime changes.
+Design Review stores tasks and proposals for the connected harness; it does not
+call a second model API. Change Verifier checks supplied Python code before and
+after a change. Customer Onboarding Monitor tracks documents, replies and
+deadlines in a durable inbox. A configured runner can receive optional webhook
+notifications. All three store results that another agent can inspect.
 
-## Reusable libraries
-
-Apps provide complete capabilities. Pallets provide portable source functions
-that can be reused when building apps. See [Text Kit](https://github.com/rhyven-ai/text-kit)
-for a tested Python example and [the pallet guide](https://github.com/rhyven-ai/rhyven/blob/main/docs/portable-pallets.md)
-for workspace/global libraries and publishing. The included composition skill
-guides agents through reuse, testing and user-approved sharing.
+Pallet tooling is retired in Rhyven 0.8. Complete apps and app workflows remain.
+Existing saved source and historical releases are retained.
