@@ -1,9 +1,9 @@
 {
   "format": 2,
   "name": "rhyven/design-review",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "rhyven",
-  "description": "Collect short proposals from your agent\u2019s reviewers and record its decision.",
+  "description": "Collect short proposals from your agent’s reviewers and record its decision.",
   "hosting": {
     "mode": "local"
   },
@@ -1115,7 +1115,7 @@
       }
     },
     "decide": {
-      "description": "Record the calling agent\u2019s decision; it may reject every proposal.",
+      "description": "Record the calling agent’s decision; it may reject every proposal.",
       "input": {
         "type": "object",
         "properties": {
@@ -1384,7 +1384,79 @@
     }
   },
   "guide": "Start a review only when different perspectives would help. The app does not call models or spawn agents. Use your existing harness to delegate each returned task once, with only the selected question/context/constraints and the requested token limit. If delegation is unavailable, use one review and identify it as the same agent; do not invent independent reviewers. No recursive delegation. Configure model, spending and permission limits in the harness before calls. Submit each proposal and actual usage when available, then decide (including rejection of all proposals). Missing usage is unknown; reported totals cover supplied usage only. The app cannot enforce provider billing or measure tokenizer output. Do not claim lower cost or improved quality without measured outcomes. Preserve dissent and use Change Verifier for executable checks. Actors identify participants within a trusted collection, not separate authentication domains. Reuse request_id only for an identical retry.",
-  "tests": [],
+  "tests": [
+    {
+      "operation": "execute",
+      "args": {
+        "action": "start",
+        "args": {
+          "question": "Which checkpoint should the successor verify?",
+          "perspectives": [
+            "Recovery"
+          ]
+        }
+      },
+      "expect": {
+        "review.status": "open"
+      }
+    },
+    {
+      "operation": "execute",
+      "args": {
+        "action": "submit",
+        "args": {
+          "review_id": {
+            "$result": "0.review.id"
+          },
+          "task_id": "1",
+          "approach": "Look up the ticket",
+          "assumptions": "Provider lookup is available",
+          "tradeoffs": "One lookup",
+          "checks": "Match the operation ID",
+          "model": "fixture"
+        }
+      },
+      "expect": {
+        "review.status": "open"
+      }
+    },
+    {
+      "operation": "execute",
+      "args": {
+        "action": "decide",
+        "args": {
+          "review_id": {
+            "$result": "0.review.id"
+          },
+          "selected_tasks": [
+            "1"
+          ],
+          "rationale": "Verify the recorded ticket"
+        }
+      },
+      "expect": {
+        "review.status": "decided",
+        "review.decision.selected_tasks": [
+          "1"
+        ]
+      }
+    },
+    {
+      "operation": "execute",
+      "args": {
+        "action": "get",
+        "args": {
+          "review_id": {
+            "$result": "0.review.id"
+          }
+        }
+      },
+      "expect": {
+        "review.status": "decided",
+        "review.decision.rationale": "Verify the recorded ticket"
+      }
+    }
+  ],
   "files": [
     "main.py"
   ],
