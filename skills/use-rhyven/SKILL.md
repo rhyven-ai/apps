@@ -1,6 +1,6 @@
 ---
 name: use-rhyven
-description: Use Rhyven to discover installed apps, search its marketplace, manage apps with human approval, and operate tasks, knowledge, or other app capabilities through the shared agent interface. Use when the user asks to use Rhyven or an installed Rhyven app.
+description: Use Rhyven to discover and operate installed apps, search its marketplace, and manage installs with human approval. Use when the user asks to use Rhyven or its apps, customize a Rhyven workflow or task view, or change what a Rhyven connection adds to prompts.
 ---
 
 # Use Rhyven
@@ -84,6 +84,34 @@ app arguments. Direct REST uses `GET /categories`,
 `GET /categories/{publisher}/{app}` and
 `POST /categories/{publisher}/{app}/functions/{function}`. The POST body is the
 function's arguments object, without the MCP wrapper.
+
+## Customize a Rhyven workflow
+
+Start with the setting or installed app that does what the user wants. The
+catalog lists what you can change and gives an example for each option.
+[Customize Rhyven](https://rhyvenai.com/#customize)
+
+For “who has what task?”, press **t** in Rhyven's terminal marketplace to see
+the task list. To answer from an agent or build a different view, describe
+`rhyven/work-management` with `rhyven_describe`. If the installed contract
+includes `action_ownership`, read the first page with `rhyven_call`.
+
+```json
+{"category":"rhyven/work-management","function":"action_ownership","args":{"offset":0,"limit":100}}
+```
+
+Each row in `items` has an `assigned_actor` and a `current_owner`. The first is
+the assignee. The second is the actor with a live claim. Show a null owner as
+“Unclaimed” even when the task has an assignee. For a view by owner, group the
+rows by `current_owner`. If a page is full, advance `offset` by the number of
+rows you read and continue until you get a short or empty page.
+
+When the user needs custom logic, inspect the relevant app's inputs and outputs
+with `rhyven_describe`, then choose the builder skill for how the code will run.
+For example, use `build-rhyven-script-app` for a Python filter that keeps release
+notes from the passages Wobbegong finds. On a connection with prompt enrichment
+enabled, the filter returns the IDs to keep, in order, in `selected`. Returning
+`{"selected":[]}` sends the user's original prompt unchanged.
 
 ## Find and manage apps
 
@@ -249,12 +277,11 @@ change revision IDs to evade these limits. Build a missing local action or ask
 a focused question when discovery stops being useful.
 
 Apps are complete applications. Use ordinary language libraries for small code
-helpers. Pallet/brick tooling and --project are retired in 0.8; keep old saved
-source intact. Do not search retired pallet actions or translate pending downloads.
+helpers. Keep saved source and data intact when working with older projects.
 
 Engine-managed workflows remain available through app compose with pinned app
-dependencies and partial-failure records. Use operation:"workflow"; "stack" is a
-legacy alias. Inspect partial outcomes before retrying uncertain side effects.
+dependencies and partial-failure records. Use `operation: "workflow"` in new
+definitions. Inspect partial outcomes before retrying uncertain side effects.
 
 Design Review delegates through the calling harness: create tasks, delegate each
 once within the user's model/budget limits, submit proposals and record a decision.

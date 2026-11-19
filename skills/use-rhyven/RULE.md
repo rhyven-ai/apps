@@ -11,6 +11,9 @@ apps and scope; this rule grants no additional authorization.
 - Describe each relevant app and follow its current `functions`/`inputSchema`.
   Categories are exact app IDs. Pass action inputs directly in `args`, without
   another nested wrapper. Re-describe after updates or contract mismatches.
+- For a Rhyven customization, check for a built-in setting or an installed app
+  that already does what the user wants. Use the catalog for examples and
+  `rhyven_describe` for the installed contract. [Customize Rhyven](https://rhyvenai.com/#customize)
 - Discovery lists installed apps. Describe `rhyven/marketplace` to search
   available apps with `object_listing_query` and inspect `object_listing_get`.
   Show description, version, publisher/source, permissions, hosting, trust and
@@ -70,7 +73,7 @@ apps and scope; this rule grants no additional authorization.
   searching. Build locally or ask a focused question when useful matches run out.
 - App workflows pin dependencies and retain partial-failure evidence. Inspect
   outcomes before retrying side effects. Local app drafts remain private unless
-  the user requests publication. Pallet tooling is retired in 0.8; preserve old data.
+  the user requests publication.
 - Use ordinary language libraries for small helper functions. Apps should provide
   complete usable capabilities, not one package per helper.
 - Design Review uses the connected harness for delegation. Respect its permissions,
